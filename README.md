@@ -12,7 +12,7 @@ Follow the instructions [here](https://django-reversion.readthedocs.io/en/stable
 you should add `'reversion.middleware.RevisionMiddleware'` to your `MIDDLEWARE` setting.
 
 
-### Using the HistoryModelViewSet
+### Using the HistoryModelViewSet
 
 The `HistoryModelViewSet` extends django-rest-framework's `ModelViewSet`
 adding a GET `history` action in the detail,
