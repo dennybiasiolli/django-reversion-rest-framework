@@ -15,19 +15,15 @@ class TestModelSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-class UserSerializer(serializers.Serializer):
-
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username']
+        fields = ['id', 'username']
 
 
 class CustomRevisionSerializer(RevisionSerializer):
-    user = UserSerializer(
-        read_only=True,
-        default=serializers.CurrentUserDefault(),
-    )
+    user = UserSerializer()
 
 
 class CustomVersionSerializer(VersionSerializer):
-    revision = CustomRevisionSerializer(read_only=True)
+    revision = CustomRevisionSerializer()
