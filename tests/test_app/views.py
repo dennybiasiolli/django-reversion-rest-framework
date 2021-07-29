@@ -1,11 +1,11 @@
-from rest_framework import viewsets
 # from rest_framework import permissions
+from reversion_rest_framework.viewsets import HistoryModelViewSet
 
 from .models import TestModel
 from .serializers import TestModelSerializer
 
 
-class TestModelViewSet(viewsets.ModelViewSet):
+class TestModelViewSet(HistoryModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
