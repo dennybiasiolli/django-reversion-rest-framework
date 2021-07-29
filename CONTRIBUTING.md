@@ -10,6 +10,13 @@ pyenv virtualenv 3.9.5 django-reversion-rest-framework
 pyenv local django-reversion-rest-framework
 ```
 
+## Running tests
+
+    ```sh
+    tests/manage.py test tests
+    ```
+
+
 ## Build the package
 
     ```sh
