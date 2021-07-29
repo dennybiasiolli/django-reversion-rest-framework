@@ -7,9 +7,11 @@ from .serializers import VersionSerializer
 
 
 class HistoryModelViewSet(ModelViewSet):
+    version_serializer = VersionSerializer
+
     @action(detail=True, methods=['GET'], name='Get History')
     def history(self, request, pk=None):
         object = self.get_object()
         versions = Version.objects.get_for_object(object)
-        serializer = VersionSerializer(versions, many=True)
+        serializer = self.version_serializer(versions, many=True)
         return Response(serializer.data)
