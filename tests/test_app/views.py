@@ -1,4 +1,4 @@
-# from rest_framework import permissions
+from rest_framework import permissions
 from reversion_rest_framework.viewsets import HistoryModelViewSet
 
 from .models import TestModel
@@ -11,7 +11,7 @@ class TestModelViewSet(HistoryModelViewSet):
     """
     queryset = TestModel.objects.all()
     serializer_class = TestModelSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class TestModelCustomSerializerViewSet(HistoryModelViewSet):
@@ -20,5 +20,5 @@ class TestModelCustomSerializerViewSet(HistoryModelViewSet):
     """
     queryset = TestModel.objects.all()
     serializer_class = TestModelSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     version_serializer = CustomVersionSerializer
