@@ -15,11 +15,14 @@ class TestModelTests(APITestCase):
         data = {'name': 'Foo 1.1.0'}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(TestModel.objects.count(), 1)
-        test_model_1 = TestModel.objects.get()
-        self.assertEqual(test_model_1.name, 'Foo 1.1.0')
-        versions = Version.objects.get_for_object(test_model_1)
-        self.assertEqual(len(versions), 1)
+
+        url = reverse('testmodel-history', kwargs={'pk': response.data['id']})
+        response = self.client.get(url, format='json')
+        self.assertEqual(len(response.data), 1)
+        self.assertIsNotNone(response.data[0]['revision']['date_created'])
+        self.assertIsNone(response.data[0]['revision']['user'])
+        self.assertIsNotNone(response.data[0]['revision']['comment'])
+        self.assertEqual(response.data[0]['field_dict']['name'], 'Foo 1.1.0')
 
     def test_editing_test_model(self):
         """
@@ -29,16 +32,22 @@ class TestModelTests(APITestCase):
         data = {'name': 'Foo 1.2.0'}
         response = self.client.post(url, data, format='json')
 
-        test_model_1 = TestModel.objects.get()
-        url = reverse('testmodel-detail', kwargs={'pk': test_model_1.pk})
+        url = reverse('testmodel-detail', kwargs={'pk': response.data['id']})
         data = {'name': 'Foo 1.2.1'}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        test_model_1 = TestModel.objects.get()
-        self.assertEqual(test_model_1.name, 'Foo 1.2.1')
-        versions = Version.objects.get_for_object(test_model_1)
-        self.assertEqual(len(versions), 2)
+        url = reverse('testmodel-history', kwargs={'pk': response.data['id']})
+        response = self.client.get(url, format='json')
+        self.assertEqual(len(response.data), 2)
+        self.assertIsNotNone(response.data[0]['revision']['date_created'])
+        self.assertIsNone(response.data[0]['revision']['user'])
+        self.assertIsNotNone(response.data[0]['revision']['comment'])
+        self.assertEqual(response.data[0]['field_dict']['name'], 'Foo 1.2.1')
+        self.assertIsNotNone(response.data[1]['revision']['date_created'])
+        self.assertIsNone(response.data[1]['revision']['user'])
+        self.assertIsNotNone(response.data[1]['revision']['comment'])
+        self.assertEqual(response.data[1]['field_dict']['name'], 'Foo 1.2.0')
 
     def test_deleting_test_model(self):
         """
