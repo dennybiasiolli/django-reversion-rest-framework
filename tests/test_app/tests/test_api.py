@@ -2,7 +2,6 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from reversion.models import Version
 
 from test_app.models import TestModel
 
@@ -71,13 +70,17 @@ class TestModelViewSetTests(AuthApiTestCase):
 
         test_model_1 = TestModel.objects.get()
         url = reverse('testmodel-detail', kwargs={'pk': test_model_1.pk})
-        data = {'name': 'Foo 1.2.1'}
-        response = self.client.delete(url, data, format='json')
+        response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        versions_qs = Version.objects.get_deleted(TestModel)
-        versions = versions_qs.filter(pk=test_model_1.pk)
-        self.assertEqual(len(versions), 1)
+        url = reverse('testmodel-deleted')
+        response = self.client.get(url, format='json')
+        self.assertEqual(len(response.data), 1)
+        self.assertIsNotNone(response.data[0]['revision']['date_created'])
+        self.assertEqual(response.data[0]['revision']['user'], 1)
+        self.assertIsNotNone(response.data[0]['revision']['comment'])
+        self.assertEqual(response.data[0]['field_dict']['id'], test_model_1.pk)
+        self.assertEqual(response.data[0]['field_dict']['name'], 'Foo 1.2.0')
 
 
 class TestModelsCustomSerializerViewSetTests(AuthApiTestCase):
@@ -122,13 +125,11 @@ class TestModelsCustomSerializerViewSetTests(AuthApiTestCase):
         self.assertIsNotNone(response.data[0]['revision']['date_created'])
         self.assertEqual(response.data[0]['revision']['user']['id'], 2)
         self.assertEqual(response.data[0]['revision']['user']['username'], 'user2')
-        self.assertIsNotNone(response.data[0]['revision']['user'])
         self.assertIsNotNone(response.data[0]['revision']['comment'])
         self.assertEqual(response.data[0]['field_dict']['name'], 'Foo 1.2.1')
         self.assertIsNotNone(response.data[1]['revision']['date_created'])
         self.assertEqual(response.data[1]['revision']['user']['id'], 1)
         self.assertEqual(response.data[1]['revision']['user']['username'], 'user1')
-        self.assertIsNotNone(response.data[1]['revision']['user'])
         self.assertIsNotNone(response.data[1]['revision']['comment'])
         self.assertEqual(response.data[1]['field_dict']['name'], 'Foo 1.2.0')
 
@@ -142,10 +143,15 @@ class TestModelsCustomSerializerViewSetTests(AuthApiTestCase):
 
         test_model_1 = TestModel.objects.get()
         url = reverse('testmodelcustom-detail', kwargs={'pk': test_model_1.pk})
-        data = {'name': 'Foo 1.2.1'}
-        response = self.client.delete(url, data, format='json')
+        response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        versions_qs = Version.objects.get_deleted(TestModel)
-        versions = versions_qs.filter(pk=test_model_1.pk)
-        self.assertEqual(len(versions), 1)
+        url = reverse('testmodelcustom-deleted')
+        response = self.client.get(url, format='json')
+        self.assertEqual(len(response.data), 1)
+        self.assertIsNotNone(response.data[0]['revision']['date_created'])
+        self.assertEqual(response.data[0]['revision']['user']['id'], 1)
+        self.assertEqual(response.data[0]['revision']['user']['username'], 'user1')
+        self.assertIsNotNone(response.data[0]['revision']['comment'])
+        self.assertEqual(response.data[0]['field_dict']['id'], test_model_1.pk)
+        self.assertEqual(response.data[0]['field_dict']['name'], 'Foo 1.2.0')
