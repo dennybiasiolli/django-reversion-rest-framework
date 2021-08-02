@@ -14,9 +14,15 @@ you should add `'reversion.middleware.RevisionMiddleware'` to your `MIDDLEWARE` 
 
 ### Using the HistoryModelViewSet
 
-The `HistoryModelViewSet` extends django-rest-framework's `ModelViewSet`
-adding a GET `history` action in the detail,
-displaying a list of all revisions of that specific record.
+The `HistoryModelViewSet` extends django-rest-framework's `ModelViewSet` adding
+
+- a GET `history` action in the detail
+
+    displaying a list of all revisions of that specific record
+
+- a GET `deleted` action in the list
+
+    displaying a list of all deleted records
 
 You can use the `HistoryModelViewSet` in place of the `ModelViewSet`
 during viewsets definition.
@@ -29,8 +35,11 @@ class MyModelViewSet(HistoryModelViewSet):
     # ...
 ```
 
-Then if your endpoint exposes on the url `/my-models/` you can get the history
-of a record using `my-models/<pk>/history/`.
+Then if your endpoint exposes on the url `/my-models/` you can get
+
+- the history of a record using `my-models/<pk>/history/`
+
+- all deleted records (ordered by date_created descending) using `my-models/deleted/`
 
 
 ### Customizing the VersionSerializer
