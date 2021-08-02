@@ -44,7 +44,7 @@ Then if your endpoint exposes on the url `/my-models/` you can get
 
 ### Customizing the VersionSerializer
 
-The `HistoryModelViewSet` comes up with a `history` action using a `VersionSerializer`.<br>
+The `HistoryModelViewSet` comes up with `history` and `deleted` actions using a `VersionSerializer`.<br>
 To customize the serializer with one of your own, you can use `version_serializer`.<br>
 For example, if you want to customize the `user` serializer inside a revision,
 you can use the following code:
