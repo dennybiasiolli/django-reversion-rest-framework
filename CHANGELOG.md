@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.3.1]
+
+### Changed
+
+- viewsets: Update viewsets to use mixins (#3 thanks to @anudeepsamaiya)
+
+
 ## [0.3.0]
 
 ### Added
