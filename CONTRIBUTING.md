@@ -12,31 +12,31 @@ pyenv local django-reversion-rest-framework
 
 ## Running tests
 
-    ```sh
-    tests/manage.py test tests
-    ```
+```sh
+tests/manage.py test tests
+```
 
 
 ## Build the package
 
-    ```sh
-    rm -rf dist
-    pip install --upgrade build
-    python -m build
-    ```
+```sh
+rm -rf dist
+pip install --upgrade build
+python -m build
+```
 
 
 ## Publish test package
 
-    ```sh
-    pip install --upgrade twine
-    python -m twine upload --repository testpypi dist/*
-    ```
+```sh
+pip install --upgrade twine
+python -m twine upload --repository testpypi dist/*
+```
 
 
 ## Publish official package
 
-    ```sh
-    pip install --upgrade twine
-    python -m twine upload dist/*
-    ```
+```sh
+pip install --upgrade twine
+python -m twine upload dist/*
+```
