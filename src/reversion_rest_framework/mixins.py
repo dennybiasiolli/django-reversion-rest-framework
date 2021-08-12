@@ -1,3 +1,5 @@
+import reversion
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
@@ -29,4 +31,36 @@ class HistoryModelMixin:
         versions = Version.objects.get_deleted(self._get_version_model())
         versions = versions.order_by('-revision__date_created')
         serializer = self.version_serializer(versions, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['POST'], name='Revert Version',
+            url_path='aaaa/(?P<version_pk>\d+)')
+    def revert(self, request, pk=None, version_pk=None, *args, **kwargs):
+        if not version_pk:
+            return Response(
+                {'error': 'Invalid Version Id'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        object = self.get_object()
+        versions = Version.objects.get_for_object_reference(object, pk)
+        version = versions.filter(pk=version_pk).first()
+        if not version:
+            return Response(
+                {'error': 'Version Not Found'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        try:
+            version.revision.revert()
+            object.refresh_from_db()
+            with reversion.create_revision():
+                object.save()
+                reversion.set_user(request.user)
+                reversion.set_comment(
+                    'Reverted to version {}'.format(version_pk))
+        except Exception as e:
+            return Response(
+                {'error': 'Reverting Failed', 'msg': str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        serializer = self.version_serializer(version)
         return Response(serializer.data)
