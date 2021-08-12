@@ -14,4 +14,4 @@ class VersionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Version
-        fields = ('revision', 'field_dict',)
+        fields = ('id', 'revision', 'field_dict',)
