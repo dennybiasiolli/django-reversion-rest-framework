@@ -8,9 +8,21 @@ from reversion.models import Version
 from .serializers import VersionSerializer
 
 
-class HistoryModelMixin:
-    version_model = None
+class BaseHistoryModelMixin:
     version_serializer = VersionSerializer
+
+
+class HistoryOnlyMixin(BaseHistoryModelMixin):
+    @action(detail=True, methods=['GET'], name='Get History')
+    def history(self, request, pk=None):
+        object = self.get_object()
+        versions = Version.objects.get_for_object(object)
+        serializer = self.version_serializer(versions, many=True)
+        return Response(serializer.data)
+
+
+class DeletedOnlyMixin(BaseHistoryModelMixin):
+    version_model = None
 
     def _get_version_model(self):
         if self.version_model:
@@ -19,13 +31,6 @@ class HistoryModelMixin:
         if issubclass(serializer_class, ModelSerializer):
             return serializer_class.Meta.model
 
-    @action(detail=True, methods=['GET'], name='Get History')
-    def history(self, request, pk=None):
-        object = self.get_object()
-        versions = Version.objects.get_for_object(object)
-        serializer = self.version_serializer(versions, many=True)
-        return Response(serializer.data)
-
     @action(detail=False, methods=['GET'], name='Get Deleted')
     def deleted(self, request):
         versions = Version.objects.get_deleted(self._get_version_model())
@@ -33,8 +38,14 @@ class HistoryModelMixin:
         serializer = self.version_serializer(versions, many=True)
         return Response(serializer.data)
 
+
+class ReadOnlyHistoryModel(HistoryOnlyMixin, DeletedOnlyMixin):
+    pass
+
+
+class RevertMixin(HistoryOnlyMixin):
     @action(detail=True, methods=['POST'], name='Revert Version',
-            url_path='aaaa/(?P<version_pk>\d+)')
+            url_path='revert/(?P<version_pk>\d+)')
     def revert(self, request, pk=None, version_pk=None, *args, **kwargs):
         if not version_pk:
             return Response(
@@ -64,3 +75,7 @@ class HistoryModelMixin:
             )
         serializer = self.version_serializer(version)
         return Response(serializer.data)
+
+
+class HistoryModelMixin(RevertMixin, DeletedOnlyMixin):
+    pass
