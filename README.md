@@ -16,13 +16,17 @@ you should add `'reversion.middleware.RevisionMiddleware'` to your `MIDDLEWARE` 
 
 The `HistoryModelViewSet` extends django-rest-framework's `ModelViewSet` adding
 
-- a GET `history` action in the detail
+- a GET `history` action in the detail (`/my-model-url/<pk>/history/`)
 
     displaying a list of all revisions of that specific record
 
-- a GET `deleted` action in the list
+- a GET `deleted` action in the list (`/my-model-url/deleted/`)
 
     displaying a list of all deleted records
+
+- a POST `revert` action in the detail (`/my-model-url/<pk>/revert/<version_pk>/`)
+
+    allowing users to revert to a previous revision of the object
 
 You can use the `HistoryModelViewSet` in place of the `ModelViewSet`
 during viewsets definition.
@@ -35,11 +39,15 @@ class MyModelViewSet(HistoryModelViewSet):
     # ...
 ```
 
-Then if your endpoint exposes on the url `/my-models/` you can get
+For advanced or selective implementation, you can use `reversion_rest_framework.mixins`.
 
-- the history of a record using `my-models/<pk>/history/`
+- `HistoryOnlyMixin` contains only the `history` action
 
-- all deleted records (ordered by date_created descending) using `my-models/deleted/`
+- `DeletedOnlyMixin` contains only the `deleted` action
+
+- `ReadOnlyHistoryModel` contains `history` and `revert` actions
+
+- `RevertMixin` contains `history`, `revert` and `deleted` actions
 
 
 ### Customizing the VersionSerializer
