@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [0.4.0]
+
+### Added
+
+- mixins: splitting in coherent mixins and adding tests (#7)
+
+### Changed
+
+- fix: url_path for revert action from `aaaa/<version_pk>` to `revert/<version_pk>` (#4)
+
+
 ## [0.3.1]
 
 ### Changed
