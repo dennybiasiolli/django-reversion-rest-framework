@@ -1,5 +1,8 @@
+import string
+
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils.http import urlencode
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -263,3 +266,33 @@ class TestModelsCustomSerializerViewSetTests(AuthApiTestCase):
         self.assertEqual(response.data[2]['revision']['user']['username'], 'user1')
         self.assertIsNotNone(response.data[2]['revision']['comment'])
         self.assertEqual(response.data[2]['field_dict']['name'], 'Foo 1.2.0')
+
+    def test_pagination(self):
+        """
+        Ensure that the pagination works as expected, and that individual revisions can be obtained.
+        """
+        create_url = reverse('testmodelpaginated-list')
+
+        response = self.client.post(create_url, {'name': 'Foo 1.2.0'}, format='json')
+        pk = response.data['id']
+
+        update_url = reverse('testmodelpaginated-detail', kwargs={'pk': response.data['id']})
+
+        for letter in string.ascii_lowercase:
+            self.client.patch(update_url, {'name': letter}, format='json')
+
+        history_base_url = reverse('testmodelpaginated-history', kwargs={'pk': pk})
+        for page, count in [(1, 10), (2, 10), (3, 7)]:
+            query_kwargs = {'page': page}
+            history_url = f'{history_base_url}?{urlencode(query_kwargs)}'
+            response = self.client.get(history_url, format='json')
+            self.assertEqual(response.data['count'], 27)
+            self.assertEqual(len(response.data['results']), count)
+
+        for version_pk, name in enumerate(string.ascii_lowercase, start=2):
+            historic_version_url = reverse('testmodelpaginated-version', kwargs={'pk': pk, 'version_pk': version_pk})
+            response = self.client.get(historic_version_url, format='json')
+            self.assertEqual(response.data['id'], version_pk)
+            self.assertEqual(response.data['field_dict']['name'], name)
+
+
