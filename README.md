@@ -20,6 +20,10 @@ The `HistoryModelViewSet` extends django-rest-framework's `ModelViewSet` adding
 
     displaying a list of all revisions of that specific record
 
+- a GET `version` action in the history detail (`/my-model-url/<pk>/history/<version_pk>/`)
+
+    displaying a specific revisions of that specific record
+
 - a GET `deleted` action in the list (`/my-model-url/deleted/`)
 
     displaying a list of all deleted records
@@ -41,18 +45,18 @@ class MyModelViewSet(HistoryModelViewSet):
 
 For advanced or selective implementation, you can use `reversion_rest_framework.mixins`.
 
-- `HistoryOnlyMixin` contains only the `history` action
+- `HistoryOnlyMixin` contains `history` and `version` actions
 
 - `DeletedOnlyMixin` contains only the `deleted` action
 
-- `ReadOnlyHistoryModel` contains `history` and `revert` actions
+- `ReadOnlyHistoryModel` contains `history`, `version` and `deleted` actions
 
-- `RevertMixin` contains `history`, `revert` and `deleted` actions
+- `RevertMixin` contains `history`, `version` and `revert` actions
 
 
 ### Customizing the VersionSerializer
 
-The `HistoryModelViewSet` comes up with `history` and `deleted` actions using a `VersionSerializer`.<br>
+The `HistoryModelViewSet` comes up with actions using a `VersionSerializer`.<br>
 To customize the serializer with one of your own, you can use `version_serializer`.<br>
 For example, if you want to customize the `user` serializer inside a revision,
 you can use the following code:
