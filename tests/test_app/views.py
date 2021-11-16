@@ -22,3 +22,4 @@ class TestModelCustomSerializerViewSet(HistoryModelViewSet):
     serializer_class = TestModelSerializer
     permission_classes = [permissions.IsAuthenticated]
     version_serializer = CustomVersionSerializer
+
