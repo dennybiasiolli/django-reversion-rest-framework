@@ -30,8 +30,9 @@ class MixinsTests(TestCase):
         )
         self.assertTrue(
             issubclass(mixins.HistoryOnlyMixin, mixins.BaseHistoryModelMixin))
-        self.assertEqual(len(url_paths), 1)
+        self.assertEqual(len(url_paths), 2)
         self.assertTrue('history' in url_paths)
+        self.assertTrue(r'history/(?P<version_pk>\d+)' in url_paths)
 
     def test_deleted_only_mixin(self):
         """
@@ -63,7 +64,7 @@ class MixinsTests(TestCase):
             issubclass(mixins.ReadOnlyHistoryModel, mixins.HistoryOnlyMixin))
         self.assertTrue(
             issubclass(mixins.ReadOnlyHistoryModel, mixins.DeletedOnlyMixin))
-        self.assertEqual(len(url_paths), 2)
+        self.assertEqual(len(url_paths), 3)
         self.assertTrue('history' in url_paths)
         self.assertTrue('deleted' in url_paths)
 
@@ -79,9 +80,10 @@ class MixinsTests(TestCase):
         )
         self.assertTrue(
             issubclass(mixins.RevertMixin, mixins.HistoryOnlyMixin))
-        self.assertEqual(len(url_paths), 2)
+        self.assertEqual(len(url_paths), 3)
         self.assertTrue('history' in url_paths)
-        self.assertTrue('revert/(?P<version_pk>\d+)' in url_paths)
+        self.assertTrue(r'history/(?P<version_pk>\d+)' in url_paths)
+        self.assertTrue(r'revert/(?P<version_pk>\d+)' in url_paths)
 
     def test_history_model_mixin(self):
         """
@@ -97,7 +99,8 @@ class MixinsTests(TestCase):
             issubclass(mixins.HistoryModelMixin, mixins.RevertMixin))
         self.assertTrue(
             issubclass(mixins.HistoryModelMixin, mixins.DeletedOnlyMixin))
-        self.assertEqual(len(url_paths), 3)
+        self.assertEqual(len(url_paths), 4)
         self.assertTrue('history' in url_paths)
-        self.assertTrue('revert/(?P<version_pk>\d+)' in url_paths)
+        self.assertTrue(r'history/(?P<version_pk>\d+)' in url_paths)
+        self.assertTrue(r'revert/(?P<version_pk>\d+)' in url_paths)
         self.assertTrue('deleted' in url_paths)
