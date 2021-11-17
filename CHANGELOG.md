@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## [0.5.0]
+
+### Added
+
+- mixins: adding a `version` action for getting a specific version of the history
+    (#10 thanks to @gecBurton)
+- tests: test case for pagination
+
+### Changed
+
+- mixins: handling pagination in `history` action (#10 thanks to @gecBurton)
+- mixins: sorting `history` by `-revision__date_created` (#10 thanks to @gecBurton)
+
+
 ## [0.4.0]
 
 ### Added

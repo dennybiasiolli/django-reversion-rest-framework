@@ -2,6 +2,7 @@ import string
 
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils.http import urlencode
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -30,12 +31,12 @@ class TestModelViewSetTests(AuthApiTestCase):
 
         url = reverse('testmodel-history', kwargs={'pk': response.data['id']})
         response = self.client.get(url, format='json')
-        self.assertEqual(response.data["count"], 1)
-        self.assertIsNotNone(response.data["results"][0]['id'])
-        self.assertIsNotNone(response.data["results"][0]['revision']['date_created'])
-        self.assertEqual(response.data["results"][0]['revision']['user'], 1)
-        self.assertIsNotNone(response.data["results"][0]['revision']['comment'])
-        self.assertEqual(response.data["results"][0]['field_dict']['name'], 'Foo 1.1.0')
+        self.assertEqual(len(response.data), 1)
+        self.assertIsNotNone(response.data[0]['id'])
+        self.assertIsNotNone(response.data[0]['revision']['date_created'])
+        self.assertEqual(response.data[0]['revision']['user'], 1)
+        self.assertIsNotNone(response.data[0]['revision']['comment'])
+        self.assertEqual(response.data[0]['field_dict']['name'], 'Foo 1.1.0')
 
     def test_editing_test_model(self):
         """
@@ -53,17 +54,17 @@ class TestModelViewSetTests(AuthApiTestCase):
 
         url = reverse('testmodel-history', kwargs={'pk': response.data['id']})
         response = self.client.get(url, format='json')
-        self.assertEqual(response.data["count"], 2)
-        self.assertIsNotNone(response.data["results"][0]['id'])
-        self.assertIsNotNone(response.data["results"][0]['revision']['date_created'])
-        self.assertEqual(response.data["results"][0]['revision']['user'], 2)
-        self.assertIsNotNone(response.data["results"][0]['revision']['comment'])
-        self.assertEqual(response.data["results"][0]['field_dict']['name'], 'Foo 1.2.1')
-        self.assertIsNotNone(response.data["results"][1]['id'])
-        self.assertIsNotNone(response.data["results"][1]['revision']['date_created'])
-        self.assertEqual(response.data["results"][1]['revision']['user'], 1)
-        self.assertIsNotNone(response.data["results"][1]['revision']['comment'])
-        self.assertEqual(response.data["results"][1]['field_dict']['name'], 'Foo 1.2.0')
+        self.assertEqual(len(response.data), 2)
+        self.assertIsNotNone(response.data[0]['id'])
+        self.assertIsNotNone(response.data[0]['revision']['date_created'])
+        self.assertEqual(response.data[0]['revision']['user'], 2)
+        self.assertIsNotNone(response.data[0]['revision']['comment'])
+        self.assertEqual(response.data[0]['field_dict']['name'], 'Foo 1.2.1')
+        self.assertIsNotNone(response.data[1]['id'])
+        self.assertIsNotNone(response.data[1]['revision']['date_created'])
+        self.assertEqual(response.data[1]['revision']['user'], 1)
+        self.assertIsNotNone(response.data[1]['revision']['comment'])
+        self.assertEqual(response.data[1]['field_dict']['name'], 'Foo 1.2.0')
 
     def test_deleting_test_model(self):
         """
@@ -108,7 +109,7 @@ class TestModelViewSetTests(AuthApiTestCase):
 
         url = reverse('testmodel-revert', kwargs={
             'pk': pk,
-            'version_pk': response.data["results"][1]['id'],
+            'version_pk': response.data[1]['id'],
         })
         response = self.client.post(url, data, format='json')
         self.assertIsNotNone(response.data['id'])
@@ -119,22 +120,22 @@ class TestModelViewSetTests(AuthApiTestCase):
 
         url = reverse('testmodel-history', kwargs={'pk': pk})
         response = self.client.get(url, format='json')
-        self.assertEqual(response.data["count"], 3)
-        self.assertIsNotNone(response.data["results"][0]['id'])
-        self.assertIsNotNone(response.data["results"][0]['revision']['date_created'])
-        self.assertEqual(response.data["results"][0]['revision']['user'], 2)
-        self.assertIsNotNone(response.data["results"][0]['revision']['comment'])
-        self.assertEqual(response.data["results"][0]['field_dict']['name'], 'Foo 1.2.0')
-        self.assertIsNotNone(response.data["results"][1]['id'])
-        self.assertIsNotNone(response.data["results"][1]['revision']['date_created'])
-        self.assertEqual(response.data["results"][1]['revision']['user'], 2)
-        self.assertIsNotNone(response.data["results"][1]['revision']['comment'])
-        self.assertEqual(response.data["results"][1]['field_dict']['name'], 'Foo 1.2.1')
-        self.assertIsNotNone(response.data["results"][2]['id'])
-        self.assertIsNotNone(response.data["results"][2]['revision']['date_created'])
-        self.assertEqual(response.data["results"][2]['revision']['user'], 1)
-        self.assertIsNotNone(response.data["results"][2]['revision']['comment'])
-        self.assertEqual(response.data["results"][2]['field_dict']['name'], 'Foo 1.2.0')
+        self.assertEqual(len(response.data), 3)
+        self.assertIsNotNone(response.data[0]['id'])
+        self.assertIsNotNone(response.data[0]['revision']['date_created'])
+        self.assertEqual(response.data[0]['revision']['user'], 2)
+        self.assertIsNotNone(response.data[0]['revision']['comment'])
+        self.assertEqual(response.data[0]['field_dict']['name'], 'Foo 1.2.0')
+        self.assertIsNotNone(response.data[1]['id'])
+        self.assertIsNotNone(response.data[1]['revision']['date_created'])
+        self.assertEqual(response.data[1]['revision']['user'], 2)
+        self.assertIsNotNone(response.data[1]['revision']['comment'])
+        self.assertEqual(response.data[1]['field_dict']['name'], 'Foo 1.2.1')
+        self.assertIsNotNone(response.data[2]['id'])
+        self.assertIsNotNone(response.data[2]['revision']['date_created'])
+        self.assertEqual(response.data[2]['revision']['user'], 1)
+        self.assertIsNotNone(response.data[2]['revision']['comment'])
+        self.assertEqual(response.data[2]['field_dict']['name'], 'Foo 1.2.0')
 
 
 class TestModelsCustomSerializerViewSetTests(AuthApiTestCase):
@@ -150,13 +151,13 @@ class TestModelsCustomSerializerViewSetTests(AuthApiTestCase):
         url = reverse('testmodelcustom-history',
                       kwargs={'pk': response.data['id']})
         response = self.client.get(url, format='json')
-        self.assertEqual(response.data["count"], 1)
-        self.assertIsNotNone(response.data["results"][0]['id'])
-        self.assertIsNotNone(response.data["results"][0]['revision']['date_created'])
-        self.assertEqual(response.data["results"][0]['revision']['user']['id'], 1)
-        self.assertEqual(response.data["results"][0]['revision']['user']['username'], 'user1')
-        self.assertIsNotNone(response.data["results"][0]['revision']['comment'])
-        self.assertEqual(response.data["results"][0]['field_dict']['name'], 'Foo 1.1.0')
+        self.assertEqual(len(response.data), 1)
+        self.assertIsNotNone(response.data[0]['id'])
+        self.assertIsNotNone(response.data[0]['revision']['date_created'])
+        self.assertEqual(response.data[0]['revision']['user']['id'], 1)
+        self.assertEqual(response.data[0]['revision']['user']['username'], 'user1')
+        self.assertIsNotNone(response.data[0]['revision']['comment'])
+        self.assertEqual(response.data[0]['field_dict']['name'], 'Foo 1.1.0')
 
     def test_editing_test_model(self):
         """
@@ -176,19 +177,19 @@ class TestModelsCustomSerializerViewSetTests(AuthApiTestCase):
         url = reverse('testmodelcustom-history',
                       kwargs={'pk': response.data['id']})
         response = self.client.get(url, format='json')
-        self.assertEqual(response.data["count"], 2)
-        self.assertIsNotNone(response.data["results"][0]['id'])
-        self.assertIsNotNone(response.data["results"][0]['revision']['date_created'])
-        self.assertEqual(response.data["results"][0]['revision']['user']['id'], 2)
-        self.assertEqual(response.data["results"][0]['revision']['user']['username'], 'user2')
-        self.assertIsNotNone(response.data["results"][0]['revision']['comment'])
-        self.assertEqual(response.data["results"][0]['field_dict']['name'], 'Foo 1.2.1')
-        self.assertIsNotNone(response.data["results"][1]['id'])
-        self.assertIsNotNone(response.data["results"][1]['revision']['date_created'])
-        self.assertEqual(response.data["results"][1]['revision']['user']['id'], 1)
-        self.assertEqual(response.data["results"][1]['revision']['user']['username'], 'user1')
-        self.assertIsNotNone(response.data["results"][1]['revision']['comment'])
-        self.assertEqual(response.data["results"][1]['field_dict']['name'], 'Foo 1.2.0')
+        self.assertEqual(len(response.data), 2)
+        self.assertIsNotNone(response.data[0]['id'])
+        self.assertIsNotNone(response.data[0]['revision']['date_created'])
+        self.assertEqual(response.data[0]['revision']['user']['id'], 2)
+        self.assertEqual(response.data[0]['revision']['user']['username'], 'user2')
+        self.assertIsNotNone(response.data[0]['revision']['comment'])
+        self.assertEqual(response.data[0]['field_dict']['name'], 'Foo 1.2.1')
+        self.assertIsNotNone(response.data[1]['id'])
+        self.assertIsNotNone(response.data[1]['revision']['date_created'])
+        self.assertEqual(response.data[1]['revision']['user']['id'], 1)
+        self.assertEqual(response.data[1]['revision']['user']['username'], 'user1')
+        self.assertIsNotNone(response.data[1]['revision']['comment'])
+        self.assertEqual(response.data[1]['field_dict']['name'], 'Foo 1.2.0')
 
     def test_deleting_test_model(self):
         """
@@ -234,7 +235,7 @@ class TestModelsCustomSerializerViewSetTests(AuthApiTestCase):
 
         url = reverse('testmodelcustom-revert', kwargs={
             'pk': pk,
-            'version_pk': response.data["results"][1]['id'],
+            'version_pk': response.data[1]['id'],
         })
         response = self.client.post(url, data, format='json')
         self.assertIsNotNone(response.data['id'])
@@ -246,51 +247,53 @@ class TestModelsCustomSerializerViewSetTests(AuthApiTestCase):
 
         url = reverse('testmodelcustom-history', kwargs={'pk': pk})
         response = self.client.get(url, format='json')
-        self.assertEqual(response.data["count"], 3)
-        self.assertIsNotNone(response.data["results"][0]['id'])
-        self.assertIsNotNone(response.data["results"][0]['revision']['date_created'])
-        self.assertEqual(response.data["results"][0]['revision']['user']['id'], 2)
-        self.assertEqual(response.data["results"][0]['revision']['user']['username'], 'user2')
-        self.assertIsNotNone(response.data["results"][0]['revision']['comment'])
-        self.assertEqual(response.data["results"][0]['field_dict']['name'], 'Foo 1.2.0')
-        self.assertIsNotNone(response.data["results"][1]['id'])
-        self.assertIsNotNone(response.data["results"][1]['revision']['date_created'])
-        self.assertEqual(response.data["results"][1]['revision']['user']['id'], 2)
-        self.assertEqual(response.data["results"][1]['revision']['user']['username'], 'user2')
-        self.assertIsNotNone(response.data["results"][1]['revision']['comment'])
-        self.assertEqual(response.data["results"][1]['field_dict']['name'], 'Foo 1.2.1')
-        self.assertIsNotNone(response.data["results"][2]['id'])
-        self.assertIsNotNone(response.data["results"][2]['revision']['date_created'])
-        self.assertEqual(response.data["results"][2]['revision']['user']['id'], 1)
-        self.assertEqual(response.data["results"][2]['revision']['user']['username'], 'user1')
-        self.assertIsNotNone(response.data["results"][2]['revision']['comment'])
-        self.assertEqual(response.data["results"][2]['field_dict']['name'], 'Foo 1.2.0')
+        self.assertEqual(len(response.data), 3)
+        self.assertIsNotNone(response.data[0]['id'])
+        self.assertIsNotNone(response.data[0]['revision']['date_created'])
+        self.assertEqual(response.data[0]['revision']['user']['id'], 2)
+        self.assertEqual(response.data[0]['revision']['user']['username'], 'user2')
+        self.assertIsNotNone(response.data[0]['revision']['comment'])
+        self.assertEqual(response.data[0]['field_dict']['name'], 'Foo 1.2.0')
+        self.assertIsNotNone(response.data[1]['id'])
+        self.assertIsNotNone(response.data[1]['revision']['date_created'])
+        self.assertEqual(response.data[1]['revision']['user']['id'], 2)
+        self.assertEqual(response.data[1]['revision']['user']['username'], 'user2')
+        self.assertIsNotNone(response.data[1]['revision']['comment'])
+        self.assertEqual(response.data[1]['field_dict']['name'], 'Foo 1.2.1')
+        self.assertIsNotNone(response.data[2]['id'])
+        self.assertIsNotNone(response.data[2]['revision']['date_created'])
+        self.assertEqual(response.data[2]['revision']['user']['id'], 1)
+        self.assertEqual(response.data[2]['revision']['user']['username'], 'user1')
+        self.assertIsNotNone(response.data[2]['revision']['comment'])
+        self.assertEqual(response.data[2]['field_dict']['name'], 'Foo 1.2.0')
 
     def test_pagination(self):
         """
         Ensure that the pagination works as expected, and that individual revisions can be obtained.
         """
-        create_url = reverse('testmodelcustom-list')
+        create_url = reverse('testmodelpaginated-list')
 
         response = self.client.post(create_url, {'name': 'Foo 1.2.0'}, format='json')
         pk = response.data['id']
 
-        update_url = reverse('testmodelcustom-detail', kwargs={'pk': response.data['id']})
+        update_url = reverse('testmodelpaginated-detail', kwargs={'pk': response.data['id']})
 
         for letter in string.ascii_lowercase:
             self.client.patch(update_url, {'name': letter}, format='json')
 
+        history_base_url = reverse('testmodelpaginated-history', kwargs={'pk': pk})
         for page, count in [(1, 10), (2, 10), (3, 7)]:
-            history_url = f"http://testserver/test-app/test-models-custom/{pk}/history/?page={page}"
+            query_kwargs = {'page': page}
+            history_url = f'{history_base_url}?{urlencode(query_kwargs)}'
             response = self.client.get(history_url, format='json')
-            self.assertEqual(response.data["count"], 27)
-            self.assertEqual(len(response.data["results"]), count)
+            self.assertEqual(response.data['count'], 27)
+            self.assertEqual(len(response.data['results']), count)
 
         for version_pk, name in enumerate(string.ascii_lowercase, start=2):
-            historic_version_url = f"http://testserver/test-app/test-models-custom/{pk}/history/{version_pk}/"
+            historic_version_url = reverse('testmodelpaginated-version', kwargs={'pk': pk, 'version_pk': version_pk})
             response = self.client.get(historic_version_url, format='json')
-            self.assertEqual(response.data["id"], version_pk)
-            self.assertEqual(response.data["field_dict"]["name"], name)
+            self.assertEqual(response.data['id'], version_pk)
+            self.assertEqual(response.data['field_dict']['name'], name)
 
 
 class TestModelsOriginalSerializerViewSetTests(AuthApiTestCase):

@@ -45,7 +45,7 @@ class HistoryOnlyMixin(BaseHistoryModelMixin):
     def history(self, request, pk=None):
         instance = self.get_object()
         versions = Version.objects.get_for_object(instance).order_by(
-            "revision__created_date"
+            '-revision__date_created'
         )
         page = self.paginate_queryset(versions)
 
@@ -55,7 +55,7 @@ class HistoryOnlyMixin(BaseHistoryModelMixin):
         serializer = self.build_serializer(instance.__class__, versions, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['GET'], name='Get Historic Version', url_path=r"history/(?P<version_pk>\d+)")
+    @action(detail=True, methods=['GET'], name='Get Historic Version', url_path=r'history/(?P<version_pk>\d+)')
     def version(self, request, pk=None, version_pk=None):
         instance = self.get_object()
         version = get_object_or_404(Version.objects.get_for_object(instance), id=version_pk)
@@ -94,8 +94,8 @@ class RevertMixin(HistoryOnlyMixin):
                 {'error': 'Invalid Version Id'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        object = self.get_object()
-        versions = Version.objects.get_for_object_reference(object, pk)
+        instance = self.get_object()
+        versions = Version.objects.get_for_object_reference(instance, pk)
         version = versions.filter(pk=version_pk).first()
         if not version:
             return Response(
@@ -104,9 +104,9 @@ class RevertMixin(HistoryOnlyMixin):
             )
         try:
             version.revision.revert()
-            object.refresh_from_db()
+            instance.refresh_from_db()
             with reversion.create_revision():
-                object.save()
+                instance.save()
                 reversion.set_user(request.user)
                 reversion.set_comment(
                     'Reverted to version {}'.format(version_pk))
