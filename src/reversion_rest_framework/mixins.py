@@ -1,7 +1,11 @@
+from typing import Optional
+
 import reversion
+from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.fields import SerializerMethodField
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 from reversion.models import Version
@@ -14,6 +18,29 @@ class BaseHistoryModelMixin:
 
 
 class HistoryOnlyMixin(BaseHistoryModelMixin):
+
+    def build_serializer(self, instance_class: type, queryset: QuerySet, many: Optional[bool] = False):
+        """wraps the original serializer within the Version serializer on the field_dict field
+        """
+
+        class _InstanceSerializer(ModelSerializer):
+
+            class Meta:
+                model = instance_class
+                fields = "__all__"
+
+        class _VersionsSerializer(self.version_serializer):
+            field_dict = SerializerMethodField()
+
+            @staticmethod
+            def get_field_dict(obj):
+                model_serializer = _InstanceSerializer(data=obj.field_dict)
+                model_serializer.is_valid(raise_exception=True)
+                original_serializer = self.get_serializer(model_serializer.validated_data)
+                return original_serializer.data
+
+        return _VersionsSerializer(queryset, many=many)
+
     @action(detail=True, methods=['GET'], name='Get History')
     def history(self, request, pk=None):
         instance = self.get_object()
@@ -21,17 +48,18 @@ class HistoryOnlyMixin(BaseHistoryModelMixin):
             "revision__created_date"
         )
         page = self.paginate_queryset(versions)
+
         if page is not None:
-            serializer = self.version_serializer(page, many=True)
+            serializer = self.build_serializer(instance.__class__, page, many=True)
             return self.get_paginated_response(serializer.data)
-        serializer = self.version_serializer(versions, many=True)
+        serializer = self.build_serializer(instance.__class__, versions, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=['GET'], name='Get Historic Version', url_path=r"history/(?P<version_pk>\d+)")
     def version(self, request, pk=None, version_pk=None):
         instance = self.get_object()
         version = get_object_or_404(Version.objects.get_for_object(instance), id=version_pk)
-        serializer = self.version_serializer(version)
+        serializer = self.build_serializer(instance.__class__, version)
         return Response(serializer.data)
 
 

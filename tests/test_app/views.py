@@ -1,8 +1,8 @@
 from rest_framework import permissions
 from reversion_rest_framework.viewsets import HistoryModelViewSet
 
-from .models import TestModel
-from .serializers import CustomVersionSerializer, TestModelSerializer
+from .models import TestModel, TestParentModel
+from .serializers import CustomVersionSerializer, TestModelSerializer, ParentTestModelSerializer
 
 
 class TestModelViewSet(HistoryModelViewSet):
@@ -22,4 +22,13 @@ class TestModelCustomSerializerViewSet(HistoryModelViewSet):
     serializer_class = TestModelSerializer
     permission_classes = [permissions.IsAuthenticated]
     version_serializer = CustomVersionSerializer
+
+
+class TestParentModelViewSet(HistoryModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = TestParentModel.objects.all()
+    serializer_class = ParentTestModelSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
