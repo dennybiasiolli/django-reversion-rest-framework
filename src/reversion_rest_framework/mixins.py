@@ -35,8 +35,12 @@ class HistoryOnlyMixin(BaseHistoryModelMixin):
 
             @staticmethod
             def get_field_dict(obj):
+                # here we use the transient ModelSerializer to serialize
+                # the json blob returned from the version
                 model_serializer = _InstanceSerializer(data=obj.field_dict)
                 model_serializer.is_valid(raise_exception=True)
+                # we now get the original serializer as specified by the user on the viewset,
+                # and use it to de-serializer the model-instance
                 original_serializer = self.get_serializer(model_serializer.validated_data)
                 return original_serializer.data
 
