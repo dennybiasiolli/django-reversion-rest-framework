@@ -267,10 +267,13 @@ class TestModelsCustomSerializerViewSetTests(AuthApiTestCase):
         self.assertIsNotNone(response.data[2]['revision']['comment'])
         self.assertEqual(response.data[2]['field_dict']['name'], 'Foo 1.2.0')
 
-    def test_pagination(self):
-        """
-        Ensure that the pagination works as expected, and that individual revisions can be obtained.
-        """
+
+class TestModelsPaginatedViewSetTests(AuthApiTestCase):
+    """
+    Ensure that the pagination works as expected, and that individual revisions can be obtained.
+    """
+
+    def test_pagination_history(self):
         create_url = reverse('testmodelpaginated-list')
 
         response = self.client.post(create_url, {'name': 'Foo 1.2.0'}, format='json')
@@ -295,6 +298,23 @@ class TestModelsCustomSerializerViewSetTests(AuthApiTestCase):
             self.assertEqual(response.data['id'], version_pk)
             self.assertEqual(response.data['field_dict']['name'], name)
 
+    def test_pagination_deleted(self):
+        create_url = reverse('testmodelpaginated-list')
+
+        for letter in string.ascii_lowercase:
+            response = self.client.post(
+                create_url, {'name': f'Foo_{letter}'}, format='json')
+            detail_url = reverse('testmodel-detail',
+                                 kwargs={'pk': response.data['id']})
+            self.client.delete(detail_url, format='json')
+
+        deleted_base_url = reverse('testmodelpaginated-deleted')
+        for page, count in [(1, 10), (2, 10), (3, 6)]:
+            query_kwargs = {'page': page}
+            deleted_url = f'{deleted_base_url}?{urlencode(query_kwargs)}'
+            response = self.client.get(deleted_url, format='json')
+            self.assertEqual(response.data['count'], 26)
+            self.assertEqual(len(response.data['results']), count)
 
 class TestModelsOriginalSerializerViewSetTests(AuthApiTestCase):
     def test_original_serializer(self):

@@ -49,7 +49,6 @@ class HistoryOnlyMixin(BaseHistoryModelMixin):
             '-revision__date_created'
         )
         page = self.paginate_queryset(versions)
-
         if page is not None:
             serializer = self._build_serializer(instance.__class__, page, many=True)
             return self.get_paginated_response(serializer.data)
@@ -79,6 +78,10 @@ class DeletedOnlyMixin(BaseHistoryModelMixin):
         model = self._get_version_model()
         versions = Version.objects.get_deleted(model)
         versions = versions.order_by('-revision__date_created')
+        page = self.paginate_queryset(versions)
+        if page is not None:
+            serializer = self._build_serializer(model, page, many=True)
+            return self.get_paginated_response(serializer.data)
         serializer = self._build_serializer(model, versions, many=True)
         return Response(serializer.data)
 
