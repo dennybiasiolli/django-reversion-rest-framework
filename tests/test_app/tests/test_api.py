@@ -86,7 +86,7 @@ class TestModelViewSetTests(AuthApiTestCase):
         self.assertIsNotNone(response.data[0]['revision']['date_created'])
         self.assertEqual(response.data[0]['revision']['user'], 1)
         self.assertIsNotNone(response.data[0]['revision']['comment'])
-        self.assertEqual(response.data[0]['field_dict']['id'], test_model_1.pk)
+        self.assertNotIn("id", response.data[0]['field_dict'])
         self.assertEqual(response.data[0]['field_dict']['name'], 'Foo 1.2.0')
 
     def test_reverting_test_model(self):
@@ -212,7 +212,7 @@ class TestModelsCustomSerializerViewSetTests(AuthApiTestCase):
         self.assertEqual(response.data[0]['revision']['user']['id'], 1)
         self.assertEqual(response.data[0]['revision']['user']['username'], 'user1')
         self.assertIsNotNone(response.data[0]['revision']['comment'])
-        self.assertEqual(response.data[0]['field_dict']['id'], test_model_1.pk)
+        self.assertNotIn("id", response.data[0]['field_dict'])
         self.assertEqual(response.data[0]['field_dict']['name'], 'Foo 1.2.0')
 
     def test_reverting_test_model(self):
@@ -296,3 +296,36 @@ class TestModelsCustomSerializerViewSetTests(AuthApiTestCase):
             self.assertEqual(response.data['field_dict']['name'], name)
 
 
+class TestModelsOriginalSerializerViewSetTests(AuthApiTestCase):
+    def test_original_serializer(self):
+        # create original parent with children: Bart & Lisa
+        create_url = reverse('testparentmodel-list')
+        data = {'children': [{'name': 'Bart'}, {'name': 'Lisa'}]}
+        response = self.client.post(create_url, data, format='json')
+        pk = response.data['id']
+
+        # update parent with children: Bart, Lisa & Maggie
+        self.client.login(username='user2', password='password')
+        update_url = reverse('testparentmodel-detail', kwargs={'pk': pk})
+        data = {'children': [{'name': 'Bart'}, {
+            'name': 'Lisa'}, {'name': 'Maggie'}]}
+        response = self.client.put(update_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # check that:
+        history_url = reverse('testparentmodel-history',
+                              kwargs={'pk': response.data['id']})
+        response = self.client.get(history_url, format='json')
+        # 1. there are two records in history
+        self.assertEqual(len(response.data), 2)
+        # 2. the ordering is correct
+        self.assertGreater(response.data[0]['revision']['date_created'],
+                           response.data[1]['revision']['date_created'])
+        # 3. that the (historic) children are in the expected order, e.g. most recent child-list first
+        children_history = [
+            [
+                child['name'] for child in result['field_dict']['children']
+            ] for result in response.data
+        ]
+        self.assertListEqual(children_history, [
+                             ['Bart', 'Lisa', 'Maggie'], ['Bart', 'Lisa']])
