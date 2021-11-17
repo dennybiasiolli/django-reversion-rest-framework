@@ -1,12 +1,31 @@
 # CHANGELOG
 
+## [1.0.0]
+
+### Potentially BREAKING CHANGES
+
+- now `field_dict` is serialized using the original serializer,
+    check desired behavior when updating
+
+### Added
+
+- mixins: serializing `field_dict` field using the original serializer
+    (#12 thanks to @gecBurton)
+- tests: test case for `deleted` pagination
+- tests: test case for serialization
+
+### Changed
+
+- mixins: handling pagination in `deleted` action (#12)
+
+
 ## [0.5.0]
 
 ### Added
 
 - mixins: adding a `version` action for getting a specific version of the history
     (#10 thanks to @gecBurton)
-- tests: test case for pagination
+- tests: test case for `history` pagination
 
 ### Changed
 
