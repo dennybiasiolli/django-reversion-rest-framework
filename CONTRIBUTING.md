@@ -8,6 +8,7 @@ This package has been created using python 3.9.5.
 pyenv install 3.9.5
 pyenv virtualenv 3.9.5 django-reversion-rest-framework
 pyenv local django-reversion-rest-framework
+pip install -e .
 ```
 
 ## Running tests
