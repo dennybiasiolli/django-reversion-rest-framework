@@ -1,12 +1,13 @@
 from rest_framework import permissions
 from reversion_rest_framework.viewsets import HistoryModelViewSet
 
-from .models import TestModel, TestParentModel
+from .models import TestModel, TestLimitedModel, TestParentModel
 from .pagination import MyPageNumberPagination
 from .serializers import (
     CustomVersionSerializer,
     TestModelSerializer,
     ParentTestModelSerializer,
+    TestLimitedModelSerializer,
 )
 
 
@@ -45,4 +46,12 @@ class TestParentModelViewSet(HistoryModelViewSet):
     """
     queryset = TestParentModel.objects.all()
     serializer_class = ParentTestModelSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class TestLimitedModelViewSet(HistoryModelViewSet):
+    """
+    API endpoint that registers only `name` field in history.
+    """
+    queryset = TestLimitedModel.objects.all()
+    serializer_class = TestLimitedModelSerializer
     permission_classes = [permissions.IsAuthenticated]
