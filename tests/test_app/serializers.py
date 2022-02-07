@@ -5,7 +5,7 @@ from reversion_rest_framework.serializers import (
     VersionSerializer,
 )
 
-from .models import TestModel, TestParentModel
+from .models import TestModel, TestLimitedModel, TestParentModel
 
 
 class TestModelSerializer(serializers.ModelSerializer):
@@ -56,3 +56,10 @@ class ParentTestModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestParentModel
         fields = ('id', 'children')
+
+class TestLimitedModelSerializer(serializers.ModelSerializer):
+    # description = serializers.CharField()
+
+    class Meta:
+        model = TestLimitedModel
+        fields = ['id', 'name', 'description']
