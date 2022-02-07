@@ -6,6 +6,7 @@ from .views import (
     TestModelCustomSerializerViewSet,
     TestModelPaginatedViewSet,
     TestParentModelViewSet,
+    TestLimitedModelViewSet,
 )
 
 # Create a router and register our viewsets with it.
@@ -17,6 +18,8 @@ router.register('test-models-paginated', TestModelPaginatedViewSet,
                 basename='testmodelpaginated')
 router.register('test-parent-models', TestParentModelViewSet,
                 basename='testparentmodel')
+router.register('test-limited-models', TestLimitedModelViewSet,
+                basename='testlimitedmodel')
 
 
 # The API URLs are now determined automatically by the router.
