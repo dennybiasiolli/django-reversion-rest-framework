@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [1.0.1]
+
+### Changed
+
+- dropped support for python < 3.8
+- mixins: returning the base `field_dict` in case of errors during serialization (#14)
+    
+    This happens when trying to serialize an history object with only a selected
+    list of fields.
+
+
 ## [1.0.0]
 
 ### Potentially BREAKING CHANGES
