@@ -4,3 +4,6 @@
 *.egg-info/
 db.sqlite3
 *.pyc
+/htmlcov/
+.coverage
+coverage.xml
