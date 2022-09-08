@@ -45,11 +45,11 @@ class MyModelViewSet(HistoryModelViewSet):
 
 For advanced or selective implementation, you can use `reversion_rest_framework.mixins`.
 
-- `HistoryOnlyMixin` contains `history` and `version` actions
+- `HistoryMixin` contains `history` and `version` actions
 
-- `DeletedOnlyMixin` contains only the `deleted` action
+- `DeletedMixin` contains only the `deleted` action
 
-- `ReadOnlyHistoryModel` contains `history`, `version` and `deleted` actions
+- `ReadOnlyMixin` contains `history`, `version` and `deleted` actions
 
 - `RevertMixin` contains `history`, `version` and `revert` actions
 

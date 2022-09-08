@@ -9,7 +9,7 @@ class MixinsTests(TestCase):
         """
         Ensure we don't have actions but only version_serializer
         """
-        class TestViewSet(mixins.BaseHistoryModelMixin, GenericViewSet):
+        class TestViewSet(mixins.BaseHistoryMixin, GenericViewSet):
             pass
 
         url_paths = list(
@@ -22,14 +22,16 @@ class MixinsTests(TestCase):
         """
         Ensure we have only the history action
         """
-        class TestViewSet(mixins.HistoryOnlyMixin, GenericViewSet):
+        class TestViewSet(mixins.HistoryMixin, GenericViewSet):
             pass
 
         url_paths = list(
             action.url_path for action in TestViewSet.get_extra_actions()
         )
         self.assertTrue(
-            issubclass(mixins.HistoryOnlyMixin, mixins.BaseHistoryModelMixin))
+            issubclass(mixins.HistoryOnlyMixin, mixins.HistoryMixin))
+        self.assertTrue(
+            issubclass(mixins.HistoryMixin, mixins.BaseHistoryMixin))
         self.assertEqual(len(url_paths), 2)
         self.assertTrue('history' in url_paths)
         self.assertTrue(r'history/(?P<version_pk>\d+)' in url_paths)
@@ -38,14 +40,16 @@ class MixinsTests(TestCase):
         """
         Ensure we have only the deleted action
         """
-        class TestViewSet(mixins.DeletedOnlyMixin, GenericViewSet):
+        class TestViewSet(mixins.DeletedMixin, GenericViewSet):
             pass
 
         url_paths = list(
             action.url_path for action in TestViewSet.get_extra_actions()
         )
         self.assertTrue(
-            issubclass(mixins.DeletedOnlyMixin, mixins.BaseHistoryModelMixin))
+            issubclass(mixins.DeletedOnlyMixin, mixins.DeletedMixin))
+        self.assertTrue(
+            issubclass(mixins.DeletedMixin, mixins.BaseHistoryMixin))
         self.assertIsNone(TestViewSet.version_model)
         self.assertEqual(len(url_paths), 1)
         self.assertTrue('deleted' in url_paths)
@@ -54,16 +58,16 @@ class MixinsTests(TestCase):
         """
         Ensure we have history and deleted actions
         """
-        class TestViewSet(mixins.ReadOnlyHistoryModel, GenericViewSet):
+        class TestViewSet(mixins.HistoryMixin, mixins.DeletedMixin, GenericViewSet):
             pass
 
         url_paths = list(
             action.url_path for action in TestViewSet.get_extra_actions()
         )
         self.assertTrue(
-            issubclass(mixins.ReadOnlyHistoryModel, mixins.HistoryOnlyMixin))
+            issubclass(mixins.ReadOnlyHistoryModel, mixins.HistoryMixin))
         self.assertTrue(
-            issubclass(mixins.ReadOnlyHistoryModel, mixins.DeletedOnlyMixin))
+            issubclass(mixins.ReadOnlyHistoryModel, mixins.DeletedMixin))
         self.assertEqual(len(url_paths), 3)
         self.assertTrue('history' in url_paths)
         self.assertTrue('deleted' in url_paths)
@@ -79,7 +83,7 @@ class MixinsTests(TestCase):
             action.url_path for action in TestViewSet.get_extra_actions()
         )
         self.assertTrue(
-            issubclass(mixins.RevertMixin, mixins.HistoryOnlyMixin))
+            issubclass(mixins.RevertMixin, mixins.HistoryMixin))
         self.assertEqual(len(url_paths), 3)
         self.assertTrue('history' in url_paths)
         self.assertTrue(r'history/(?P<version_pk>\d+)' in url_paths)
@@ -96,9 +100,9 @@ class MixinsTests(TestCase):
             action.url_path for action in TestViewSet.get_extra_actions()
         )
         self.assertTrue(
-            issubclass(mixins.HistoryModelMixin, mixins.RevertMixin))
+            issubclass(mixins.HistoryModelMixin, mixins.DeletedMixin))
         self.assertTrue(
-            issubclass(mixins.HistoryModelMixin, mixins.DeletedOnlyMixin))
+            issubclass(mixins.HistoryModelMixin, mixins.RevertMixin))
         self.assertEqual(len(url_paths), 4)
         self.assertTrue('history' in url_paths)
         self.assertTrue(r'history/(?P<version_pk>\d+)' in url_paths)
