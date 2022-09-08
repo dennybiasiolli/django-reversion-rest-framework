@@ -1,3 +1,4 @@
+import warnings
 from typing import Optional
 
 import reversion
@@ -13,11 +14,21 @@ from reversion.models import Version
 from .serializers import VersionSerializer
 
 
-class BaseHistoryModelMixin:
+class BaseHistoryMixin:
     version_serializer = VersionSerializer
 
 
-class HistoryOnlyMixin(BaseHistoryModelMixin):
+class BaseHistoryModelMixin(BaseHistoryMixin):
+    """Deprecated! Use BaseHistoryMixin instead"""
+    warnings.warn(
+        'Deprecation notice: the "BaseHistoryModelMixin" has been renamed to '
+        '"BaseHistoryMixin" and will be removed in the next version of '
+        'django-reversion-rest-framework',
+        category=FutureWarning,
+        stacklevel=2,
+    )
+
+class HistoryMixin(BaseHistoryMixin):
 
     def _build_serializer(self, instance_class: type, queryset: QuerySet, many: Optional[bool] = False):
         """
@@ -70,7 +81,18 @@ class HistoryOnlyMixin(BaseHistoryModelMixin):
         return Response(serializer.data)
 
 
-class DeletedOnlyMixin(BaseHistoryModelMixin):
+class HistoryOnlyMixin(HistoryMixin):
+    """Deprecated! Use HistoryMixin instead"""
+    warnings.warn(
+        'Deprecation notice: the "HistoryOnlyMixin" has been renamed to '
+        '"HistoryMixin" and will be removed in the next version of '
+        'django-reversion-rest-framework',
+        category=FutureWarning,
+        stacklevel=2,
+    )
+
+
+class DeletedMixin(BaseHistoryMixin):
     version_model = None
 
     def _get_version_model(self):
@@ -93,11 +115,30 @@ class DeletedOnlyMixin(BaseHistoryModelMixin):
         return Response(serializer.data)
 
 
-class ReadOnlyHistoryModel(HistoryOnlyMixin, DeletedOnlyMixin):
-    pass
+class DeletedOnlyMixin(DeletedMixin):
+    """Deprecated! Use DeletedMixin instead"""
+    warnings.warn(
+        'Deprecation notice: the "DeletedOnlyMixin" has been renamed to '
+        '"DeletedMixin" and will be removed in the next version of '
+        'django-reversion-rest-framework',
+        category=FutureWarning,
+        stacklevel=2,
+    )
 
 
-class RevertMixin(HistoryOnlyMixin):
+class ReadOnlyHistoryModel(HistoryMixin, DeletedMixin):
+    """Deprecated! Use (HistoryMixin, DeletedMixin)instead"""
+    warnings.warn(
+        'Deprecation notice: the "ReadOnlyHistoryModel" '
+        'will be removed in the next version of '
+        'django-reversion-rest-framework. '
+        ' Please use `HistoryMixin` and `DeletedMixin` for the same behaviour',
+        category=FutureWarning,
+        stacklevel=2,
+    )
+
+
+class RevertMixin(HistoryMixin):
     @action(detail=True, methods=['POST'], name='Revert Version',
             url_path='revert/(?P<version_pk>\d+)')
     def revert(self, request, pk=None, version_pk=None, *args, **kwargs):
@@ -131,5 +172,12 @@ class RevertMixin(HistoryOnlyMixin):
         return Response(serializer.data)
 
 
-class HistoryModelMixin(RevertMixin, DeletedOnlyMixin):
-    pass
+class HistoryModelMixin(DeletedMixin, RevertMixin):
+    """Deprecated! Use `(RevertMixin, DeletedMixin)` instead"""
+    warnings.warn(
+        'Deprecation notice: the "ReadOnlyHistoryModel" '
+        'will be removed in the next version of '
+        'django-reversion-rest-framework',
+        category=FutureWarning,
+        stacklevel=2,
+    )
