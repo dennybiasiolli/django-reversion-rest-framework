@@ -6,6 +6,12 @@ pyenv-init:
 test:
 	python tests/manage.py test tests
 
+test-coverage:
+	coverage run tests/manage.py test tests
+	coverage report -m
+	coverage html
+	coverage xml
+
 build:
 	rm -rf dist
 	pip install --upgrade build
