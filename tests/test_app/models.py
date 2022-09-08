@@ -1,5 +1,5 @@
-from django.db import models
 import reversion
+from django.db import models
 
 
 @reversion.register()
@@ -12,7 +12,7 @@ class TestParentModel(models.Model):
     children = models.ManyToManyField(TestModel)
 
 
-@reversion.register(fields=('name',))
+@reversion.register(fields=("name",))
 class TestLimitedModel(models.Model):
     name = models.CharField(max_length=10)
     description = models.CharField(max_length=100)
