@@ -9,6 +9,7 @@ pyenv install 3.9.5
 pyenv virtualenv 3.9.5 django-reversion-rest-framework
 pyenv local django-reversion-rest-framework
 pip install -e .
+pip install -r requirements_dev.txt
 ```
 
 ## Running tests
