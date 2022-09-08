@@ -12,10 +12,20 @@ pip install -e .
 pip install -r requirements_dev.txt
 ```
 
+## Fixing code style
+
+```sh
+make style-fix
+```
+
+
 ## Running tests
 
 ```sh
 tests/manage.py test tests
+# or
+make style-check
+make test
 ```
 
 
