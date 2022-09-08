@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [1.1.1]
+
+### Changed
+
+- Displaying deprecation warning only when subclassing a deprecated class
+
 ## [1.1.0]
 
 ### Changed
