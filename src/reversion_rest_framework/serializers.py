@@ -3,10 +3,9 @@ from reversion.models import Revision, Version
 
 
 class RevisionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Revision
-        fields = ('date_created', 'user', 'comment')
+        fields = ("date_created", "user", "comment")
 
 
 class VersionSerializer(serializers.ModelSerializer):
@@ -14,4 +13,8 @@ class VersionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Version
-        fields = ('id', 'revision', 'field_dict',)
+        fields = (
+            "id",
+            "revision",
+            "field_dict",
+        )

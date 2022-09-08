@@ -1,23 +1,21 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from reversion_rest_framework.serializers import (
-    RevisionSerializer,
-    VersionSerializer,
-)
 
-from .models import TestModel, TestLimitedModel, TestParentModel
+from reversion_rest_framework.serializers import RevisionSerializer, VersionSerializer
+
+from .models import TestLimitedModel, TestModel, TestParentModel
 
 
 class TestModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestModel
-        fields = ['id', 'name']
+        fields = ["id", "name"]
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['id', 'username']
+        model = get_user_model()
+        fields = ["id", "username"]
 
 
 class CustomRevisionSerializer(RevisionSerializer):
@@ -32,18 +30,18 @@ class ParentTestModelSerializer(serializers.ModelSerializer):
     """A crude nested writable serializer,
     good enough for this test with no dependency on a 3rd party package.
     """
+
     children = TestModelSerializer(many=True)
 
     def create_or_update(self, validated_data, instance=None):
-        children = validated_data.pop('children')
+        children = validated_data.pop("children")
 
         if instance is not None:
             this = super().update(instance, validated_data)
         else:
             this = super().create(validated_data)
 
-        this.children.set([TestModel.objects.create(**child)
-                          for child in children])
+        this.children.set([TestModel.objects.create(**child) for child in children])
         this.save()
         return this
 
@@ -55,11 +53,12 @@ class ParentTestModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TestParentModel
-        fields = ('id', 'children')
+        fields = ("id", "children")
+
 
 class TestLimitedModelSerializer(serializers.ModelSerializer):
     # description = serializers.CharField()
 
     class Meta:
         model = TestLimitedModel
-        fields = ['id', 'name', 'description']
+        fields = ["id", "name", "description"]
