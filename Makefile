@@ -3,6 +3,18 @@ pyenv-init:
 	pyenv virtualenv 3.9.5 django-reversion-rest-framework
 	pyenv local django-reversion-rest-framework
 
+style-fix:
+	isort .
+	black .
+	flake8
+
+style-check:
+	pylint --errors-only --recursive=y src
+	pylint --load-plugins pylint_django --django-settings-module=test_project.settings --errors-only --recursive=y tests
+	isort --check-only .
+	black --check --diff .
+	flake8
+
 test:
 	python tests/manage.py test tests
 
