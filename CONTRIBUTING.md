@@ -41,14 +41,12 @@ python -m build
 ## Publish test package
 
 ```sh
-pip install --upgrade twine
-python -m twine upload --repository testpypi dist/*
+twine upload --repository testpypi dist/*
 ```
 
 
 ## Publish official package
 
 ```sh
-pip install --upgrade twine
-python -m twine upload dist/*
+twine upload dist/*
 ```
