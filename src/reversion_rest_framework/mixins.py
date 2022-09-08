@@ -21,13 +21,15 @@ class BaseHistoryMixin:
 class BaseHistoryModelMixin(BaseHistoryMixin):
     """Deprecated! Use BaseHistoryMixin instead"""
 
-    warnings.warn(
-        'Deprecation notice: the "BaseHistoryModelMixin" has been renamed to '
-        '"BaseHistoryMixin" and will be removed in the next version of '
-        "django-reversion-rest-framework",
-        category=FutureWarning,
-        stacklevel=2,
-    )
+    def __init_subclass__(cls):
+        warnings.warn(
+            'Deprecation notice: the "BaseHistoryModelMixin" has been renamed to '
+            '"BaseHistoryMixin" and will be removed in the next version of '
+            "django-reversion-rest-framework",
+            category=FutureWarning,
+            stacklevel=2,
+        )
+        return super().__init_subclass__()
 
 
 class HistoryMixin(BaseHistoryMixin):
@@ -96,13 +98,15 @@ class HistoryMixin(BaseHistoryMixin):
 class HistoryOnlyMixin(HistoryMixin):
     """Deprecated! Use HistoryMixin instead"""
 
-    warnings.warn(
-        'Deprecation notice: the "HistoryOnlyMixin" has been renamed to '
-        '"HistoryMixin" and will be removed in the next version of '
-        "django-reversion-rest-framework",
-        category=FutureWarning,
-        stacklevel=2,
-    )
+    def __init_subclass__(cls):
+        warnings.warn(
+            'Deprecation notice: the "HistoryOnlyMixin" has been renamed to '
+            '"HistoryMixin" and will be removed in the next version of '
+            "django-reversion-rest-framework",
+            category=FutureWarning,
+            stacklevel=2,
+        )
+        return super().__init_subclass__()
 
 
 class DeletedMixin(BaseHistoryMixin):
@@ -131,26 +135,30 @@ class DeletedMixin(BaseHistoryMixin):
 class DeletedOnlyMixin(DeletedMixin):
     """Deprecated! Use DeletedMixin instead"""
 
-    warnings.warn(
-        'Deprecation notice: the "DeletedOnlyMixin" has been renamed to '
-        '"DeletedMixin" and will be removed in the next version of '
-        "django-reversion-rest-framework",
-        category=FutureWarning,
-        stacklevel=2,
-    )
+    def __init_subclass__(cls):
+        warnings.warn(
+            'Deprecation notice: the "DeletedOnlyMixin" has been renamed to '
+            '"DeletedMixin" and will be removed in the next version of '
+            "django-reversion-rest-framework",
+            category=FutureWarning,
+            stacklevel=2,
+        )
+        return super().__init_subclass__()
 
 
 class ReadOnlyHistoryModel(HistoryMixin, DeletedMixin):
     """Deprecated! Use (HistoryMixin, DeletedMixin)instead"""
 
-    warnings.warn(
-        'Deprecation notice: the "ReadOnlyHistoryModel" '
-        "will be removed in the next version of "
-        "django-reversion-rest-framework. "
-        " Please use `HistoryMixin` and `DeletedMixin` for the same behaviour",
-        category=FutureWarning,
-        stacklevel=2,
-    )
+    def __init_subclass__(cls):
+        warnings.warn(
+            'Deprecation notice: the "ReadOnlyHistoryModel" '
+            "will be removed in the next version of "
+            "django-reversion-rest-framework. "
+            " Please use `HistoryMixin` and `DeletedMixin` for the same behaviour",
+            category=FutureWarning,
+            stacklevel=2,
+        )
+        return super().__init_subclass__()
 
 
 class RevertMixin(HistoryMixin):
@@ -193,10 +201,12 @@ class RevertMixin(HistoryMixin):
 class HistoryModelMixin(DeletedMixin, RevertMixin):
     """Deprecated! Use `(RevertMixin, DeletedMixin)` instead"""
 
-    warnings.warn(
-        'Deprecation notice: the "ReadOnlyHistoryModel" '
-        "will be removed in the next version of "
-        "django-reversion-rest-framework",
-        category=FutureWarning,
-        stacklevel=2,
-    )
+    def __init_subclass__(cls):
+        warnings.warn(
+            'Deprecation notice: the "ReadOnlyHistoryModel" '
+            "will be removed in the next version of "
+            "django-reversion-rest-framework",
+            category=FutureWarning,
+            stacklevel=2,
+        )
+        return super().__init_subclass__()
