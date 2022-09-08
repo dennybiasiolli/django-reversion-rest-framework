@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## [1.1.0]
+
+### Changed
+
+- `BaseHistoryModelMixin` has been renamed to `BaseHistoryMixin`
+    and will be removed in the next version
+
+- `HistoryOnlyMixin` has been renamed to `HistoryMixin`
+    and will be removed in the next version
+
+- `DeletedOnlyMixin` has been renamed to `DeletedMixin`
+    and will be removed in the next version
+
+- `ReadOnlyHistoryModel` will be removed in the next version.
+    Please use `HistoryMixin` and `DeletedMixin` for the same behaviour
+
+
 ## [1.0.1]
 
 ### Changed
