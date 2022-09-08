@@ -64,18 +64,18 @@ you can use the following code:
 ```py
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from reversion_rest_framework.viewsets import HistoryModelViewSet
 from reversion.models import Revision, Version
 from reversion_rest_framework.serializers import (
     RevisionSerializer,
     VersionSerializer,
 )
+from reversion_rest_framework.viewsets import HistoryModelViewSet
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username']
+        fields = ["id", "username"]
 
 
 class CustomRevisionSerializer(RevisionSerializer):
