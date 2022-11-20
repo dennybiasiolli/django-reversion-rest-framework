@@ -68,7 +68,7 @@ class HistoryMixin(BaseHistoryMixin):
         return _VersionsSerializer(queryset, many=many)
 
     @action(detail=True, methods=["GET"], name="Get History")
-    def history(self, request, pk=None):
+    def history(self, request, pk=None, *args, **kwargs):
         instance = self.get_object()
         versions = Version.objects.get_for_object(instance).order_by(
             "-revision__date_created"
@@ -86,7 +86,7 @@ class HistoryMixin(BaseHistoryMixin):
         name="Get Historic Version",
         url_path=r"history/(?P<version_pk>\d+)",
     )
-    def version(self, request, pk=None, version_pk=None):
+    def version(self, request, pk=None, version_pk=None, *args, **kwargs):
         instance = self.get_object()
         version = get_object_or_404(
             Version.objects.get_for_object(instance), id=version_pk
@@ -120,7 +120,7 @@ class DeletedMixin(BaseHistoryMixin):
             return serializer_class.Meta.model
 
     @action(detail=False, methods=["GET"], name="Get Deleted")
-    def deleted(self, request):
+    def deleted(self, request, *args, **kwargs):
         model = self._get_version_model()
         versions = Version.objects.get_deleted(model)
         versions = versions.order_by("-revision__date_created")
