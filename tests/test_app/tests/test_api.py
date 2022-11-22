@@ -482,3 +482,18 @@ class TestLimitedModelViewSetTests(AuthApiTestCase):
         self.assertEqual(response.data[2]["revision"]["user"], 1)
         self.assertIsNotNone(response.data[2]["revision"]["comment"])
         self.assertEqual(response.data[2]["field_dict"]["name"], "Foo 1.2.0")
+
+
+class TestCustomParamUrls(AuthApiTestCase):
+    def setUp(self):
+        super().setUp()
+        self.record1 = TestModel.objects.create(name="test name")
+
+    def test_url_with_extra_params(self):
+        url = reverse("testmodel-history", kwargs={"pk": self.record1.pk})
+        url = url.replace(
+            "/test-app/test-models/",
+            "/test-app/param/bar/test-models/",
+        )
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
