@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [1.1.2]
+
+### Changed
+
+- Fix: support custom parameters defined in urlconf (#30 by @gsfish)
+
 ## [1.1.1]
 
 ### Changed
