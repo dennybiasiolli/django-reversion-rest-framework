@@ -4,4 +4,4 @@ flake8==6.0.0
 isort==5.10.1
 pylint==2.14.5
 pylint-django==2.5.3
-twine==4.0.1
+twine==4.0.2
