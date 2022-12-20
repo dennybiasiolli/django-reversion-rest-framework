@@ -10,7 +10,7 @@ style-fix:
 
 style-check:
 	pylint --errors-only --recursive=y src
-	PYTHONPATH=${PWD}/tests pylint --load-plugins pylint_django --django-settings-module=test_project.settings --errors-only --recursive=y tests
+	pylint --load-plugins pylint_django --django-settings-module=test_project.settings --errors-only --recursive=y tests
 	isort --check-only .
 	black --check --diff .
 	flake8
