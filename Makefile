@@ -1,6 +1,6 @@
 pyenv-init:
-	pyenv install 3.9.5
-	pyenv virtualenv 3.9.5 django-reversion-rest-framework
+	pyenv install 3.11.6
+	pyenv virtualenv 3.11.6 django-reversion-rest-framework
 	pyenv local django-reversion-rest-framework
 
 style-fix:
