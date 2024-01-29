@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [1.2.0]
+
+### Changed
+
+- Chore: set default Python version to 3.11
+
 ## [1.1.2]
 
 ### Changed
