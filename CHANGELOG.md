@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [2.0.0]
+
+### Potentially BREAKING CHANGES
+
+- dropped support for python 3.8
+
 ## [1.2.0]
 
 ### Changed
