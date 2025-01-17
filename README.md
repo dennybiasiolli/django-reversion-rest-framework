@@ -49,8 +49,6 @@ For advanced or selective implementation, you can use `reversion_rest_framework.
 
 - `DeletedMixin` contains only the `deleted` action
 
-- `ReadOnlyMixin` contains `history`, `version` and `deleted` actions
-
 - `RevertMixin` contains `history`, `version` and `revert` actions
 
 
