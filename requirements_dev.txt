@@ -2,6 +2,6 @@ black==24.10.0
 coverage==7.6.10
 flake8==7.1.1
 isort==5.13.2
-pylint==3.3.3
+pylint==3.3.4
 pylint-django==2.6.1
 twine==6.1.0
