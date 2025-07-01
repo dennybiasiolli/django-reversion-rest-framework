@@ -7,8 +7,6 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    reviewers:
-      - "dennybiasiolli"
     labels:
       - "dependencies"
 
@@ -16,5 +14,3 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    reviewers:
-      - "dennybiasiolli"
