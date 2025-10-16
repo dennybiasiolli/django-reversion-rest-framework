@@ -4,6 +4,13 @@
 
 ### Potentially BREAKING CHANGES
 
+- dropped support for python 3.9
+- added support for python 3.13 and 3.14
+
+## [2.0.0]
+
+### Potentially BREAKING CHANGES
+
 - dropped support for python 3.8
 
 ## [1.2.0]
