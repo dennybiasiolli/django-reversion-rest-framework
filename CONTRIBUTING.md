@@ -2,14 +2,11 @@
 
 This package has been created using python 3.11.6.
 
-## Creating environment with pyenv
+## Creating environment with uv and enabling it
 
 ```sh
-pyenv install 3.11.6
-pyenv virtualenv 3.11.6 django-reversion-rest-framework
-pyenv local django-reversion-rest-framework
-pip install -e .
-pip install -r requirements_dev.txt
+uv sync
+source .venv/bin/activate
 ```
 
 ## Fixing code style
@@ -32,21 +29,12 @@ make test
 ## Build the package
 
 ```sh
-rm -rf dist
-pip install --upgrade build
-python -m build
-```
-
-
-## Publish test package
-
-```sh
-twine upload --repository testpypi dist/*
+uv build
 ```
 
 
 ## Publish official package
 
 ```sh
-twine upload dist/*
+uv publish
 ```
