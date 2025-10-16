@@ -1,11 +1,54 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
-]
+requires = ["setuptools>=61.2"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "django-reversion-rest-framework"
+version = "3.0.0"
+authors = [{name = "Denny Biasiolli", email = "denny.biasiolli@gmail.com"}]
+description = "A package for adding a django-reversion history endpoint to django-rest-framework ModelViewSet"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Framework :: Django",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "django-reversion>=4",
+    "djangorestframework>=3",
+]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://github.com/dennybiasiolli/django-reversion-rest-framework"
+"Bug Tracker" = "https://github.com/dennybiasiolli/django-reversion-rest-framework/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
 
 [tool.isort]
 profile = 'black'
 
 [tool.black]
+
+[dependency-groups]
+dev = [
+    "black>=25.9.0",
+    "coverage>=7.11.0",
+    "flake8>=7.3.0",
+    "isort>=6.1.0",
+    "pylint>=3.3.9",
+    "pylint-django>=2.6.1",
+]
