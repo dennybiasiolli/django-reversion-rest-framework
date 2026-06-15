@@ -74,17 +74,32 @@ class MixinsTests(TestCase):
         self.assertTrue(r"history/(?P<version_pk>\d+)" in url_paths)
         self.assertTrue(r"revert/(?P<version_pk>\d+)" in url_paths)
 
-    def test_all_mixins_combined(self):
+    def test_restore_mixin(self):
         """
-        Ensure we have all actions when combining RevertMixin and DeletedMixin
+        Ensure we have deleted and restore actions
         """
 
-        class TestViewSet(mixins.RevertMixin, mixins.DeletedMixin, GenericViewSet):
+        class TestViewSet(mixins.RestoreMixin, GenericViewSet):
             pass
 
         url_paths = list(action.url_path for action in TestViewSet.get_extra_actions())
-        self.assertEqual(len(url_paths), 4)
+        self.assertTrue(issubclass(mixins.RestoreMixin, mixins.DeletedMixin))
+        self.assertEqual(len(url_paths), 2)
+        self.assertTrue("deleted" in url_paths)
+        self.assertTrue(r"restore/(?P<version_pk>\d+)" in url_paths)
+
+    def test_all_mixins_combined(self):
+        """
+        Ensure we have all actions when combining RevertMixin and RestoreMixin
+        """
+
+        class TestViewSet(mixins.RevertMixin, mixins.RestoreMixin, GenericViewSet):
+            pass
+
+        url_paths = list(action.url_path for action in TestViewSet.get_extra_actions())
+        self.assertEqual(len(url_paths), 5)
         self.assertTrue("history" in url_paths)
         self.assertTrue(r"history/(?P<version_pk>\d+)" in url_paths)
         self.assertTrue(r"revert/(?P<version_pk>\d+)" in url_paths)
         self.assertTrue("deleted" in url_paths)
+        self.assertTrue(r"restore/(?P<version_pk>\d+)" in url_paths)

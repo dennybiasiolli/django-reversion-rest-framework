@@ -502,6 +502,62 @@ class TestRevertErrorCases(AuthApiTestCase):
         self.assertEqual(response.data["error"], "Version Not Found")
 
 
+class TestRestoreViewSetTests(AuthApiTestCase):
+    def test_restore_deleted_object(self):
+        """
+        Ensure we can restore a deleted object.
+        """
+        url = reverse("testmodel-list")
+        response = self.client.post(url, {"name": "Restorable"}, format="json")
+        pk = response.data["id"]
+
+        url = reverse("testmodel-detail", kwargs={"pk": pk})
+        self.client.delete(url, format="json")
+        self.assertEqual(TestModel.objects.filter(pk=pk).count(), 0)
+
+        url = reverse("testmodel-deleted")
+        response = self.client.get(url, format="json")
+        self.assertEqual(len(response.data), 1)
+        version_pk = response.data[0]["id"]
+
+        url = reverse("testmodel-restore", kwargs={"version_pk": version_pk})
+        response = self.client.post(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["name"], "Restorable")
+        self.assertEqual(TestModel.objects.filter(pk=pk).count(), 1)
+
+    def test_restore_version_not_found(self):
+        """
+        Ensure restoring with a non-existent version_pk returns 404.
+        """
+        url = reverse("testmodel-restore", kwargs={"version_pk": 99999})
+        response = self.client.post(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["error"], "Version Not Found")
+
+    def test_restore_clears_deleted_list(self):
+        """
+        Ensure a restored object no longer appears in the deleted list.
+        """
+        url = reverse("testmodel-list")
+        response = self.client.post(url, {"name": "ToRestore"}, format="json")
+        pk = response.data["id"]
+
+        url = reverse("testmodel-detail", kwargs={"pk": pk})
+        self.client.delete(url, format="json")
+
+        url = reverse("testmodel-deleted")
+        response = self.client.get(url, format="json")
+        version_pk = response.data[0]["id"]
+
+        url = reverse("testmodel-restore", kwargs={"version_pk": version_pk})
+        self.client.post(url, format="json")
+
+        url = reverse("testmodel-deleted")
+        response = self.client.get(url, format="json")
+        self.assertEqual(len(response.data), 0)
+
+
 class TestUnauthenticatedAccess(APITestCase):
     def test_list_requires_auth(self):
         """

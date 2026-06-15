@@ -97,6 +97,39 @@ class DeletedMixin(BaseHistoryMixin):
         return Response(serializer.data)
 
 
+class RestoreMixin(DeletedMixin):
+    @action(
+        detail=False,
+        methods=["POST"],
+        name="Restore Deleted",
+        url_path=r"restore/(?P<version_pk>\d+)",
+    )
+    def restore(self, request, version_pk=None, *args, **kwargs):
+        """Restore a deleted model instance from a version."""
+        model = self._get_version_model()
+        deleted_versions = Version.objects.get_deleted(model)
+        version = deleted_versions.filter(pk=version_pk).first()
+        if not version:
+            return Response(
+                {"error": "Version Not Found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        try:
+            version.revision.revert()
+            with reversion.create_revision():
+                instance = model.objects.get(pk=version.object_id)
+                instance.save()
+                reversion.set_user(request.user)
+                reversion.set_comment(f"Restored from version {version_pk}")
+        except Exception as e:
+            return Response(
+                {"error": "Restoring Failed", "msg": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 class RevertMixin(HistoryMixin):
     @action(
         detail=True,
