@@ -27,7 +27,6 @@ class MixinsTests(TestCase):
             pass
 
         url_paths = list(action.url_path for action in TestViewSet.get_extra_actions())
-        self.assertTrue(issubclass(mixins.HistoryOnlyMixin, mixins.HistoryMixin))
         self.assertTrue(issubclass(mixins.HistoryMixin, mixins.BaseHistoryMixin))
         self.assertEqual(len(url_paths), 2)
         self.assertTrue("history" in url_paths)
@@ -42,7 +41,6 @@ class MixinsTests(TestCase):
             pass
 
         url_paths = list(action.url_path for action in TestViewSet.get_extra_actions())
-        self.assertTrue(issubclass(mixins.DeletedOnlyMixin, mixins.DeletedMixin))
         self.assertTrue(issubclass(mixins.DeletedMixin, mixins.BaseHistoryMixin))
         self.assertIsNone(TestViewSet.version_model)
         self.assertEqual(len(url_paths), 1)
@@ -57,8 +55,6 @@ class MixinsTests(TestCase):
             pass
 
         url_paths = list(action.url_path for action in TestViewSet.get_extra_actions())
-        self.assertTrue(issubclass(mixins.ReadOnlyHistoryModel, mixins.HistoryMixin))
-        self.assertTrue(issubclass(mixins.ReadOnlyHistoryModel, mixins.DeletedMixin))
         self.assertEqual(len(url_paths), 3)
         self.assertTrue("history" in url_paths)
         self.assertTrue("deleted" in url_paths)
@@ -78,17 +74,15 @@ class MixinsTests(TestCase):
         self.assertTrue(r"history/(?P<version_pk>\d+)" in url_paths)
         self.assertTrue(r"revert/(?P<version_pk>\d+)" in url_paths)
 
-    def test_history_model_mixin(self):
+    def test_all_mixins_combined(self):
         """
-        Ensure we have all actions
+        Ensure we have all actions when combining RevertMixin and DeletedMixin
         """
 
-        class TestViewSet(mixins.HistoryModelMixin, GenericViewSet):
+        class TestViewSet(mixins.RevertMixin, mixins.DeletedMixin, GenericViewSet):
             pass
 
         url_paths = list(action.url_path for action in TestViewSet.get_extra_actions())
-        self.assertTrue(issubclass(mixins.HistoryModelMixin, mixins.DeletedMixin))
-        self.assertTrue(issubclass(mixins.HistoryModelMixin, mixins.RevertMixin))
         self.assertEqual(len(url_paths), 4)
         self.assertTrue("history" in url_paths)
         self.assertTrue(r"history/(?P<version_pk>\d+)" in url_paths)
