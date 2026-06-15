@@ -75,6 +75,23 @@ class ReadOnlyHistoryViewSet(HistoryMixin, DeletedMixin, ModelViewSet):
 ```
 
 
+### Filtering history and deleted
+
+The `history` and `deleted` endpoints support filtering by revision fields
+via query parameters:
+
+| Parameter | Example |
+|-----------|---------|
+| `user` | `?user=12` |
+| `date_created` | `?date_created=2024-01-01T00:00:00Z` |
+| `date_created__gt` | `?date_created__gt=2024-01-01T00:00:00Z` |
+| `date_created__gte` | `?date_created__gte=2024-01-01T00:00:00Z` |
+| `date_created__lt` | `?date_created__lt=2024-06-01T00:00:00Z` |
+| `date_created__lte` | `?date_created__lte=2024-06-01T00:00:00Z` |
+
+For example: `/my-model-url/<pk>/history/?date_created__gt=2024-01-01T00:00:00Z&user=12`
+
+
 ### Customizing the VersionSerializer
 
 The `HistoryModelViewSet` comes up with actions using a `VersionSerializer`.<br>
