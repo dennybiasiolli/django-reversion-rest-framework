@@ -1,6 +1,23 @@
 # CHANGELOG
 
-## [4.0.1]
+## [4.1.0]
+
+### Added
+
+- new `RestoreMixin` with a POST `restore/<version_pk>/` action
+    for restoring deleted model instances from version history (#4)
+- filtering support for `history` and `deleted` endpoints (#13)
+    via query parameters: `user`, `date_created`, `date_created__gt`,
+    `date_created__gte`, `date_created__lt`, `date_created__lte`
+
+### Changed
+
+- `HistoryModelViewSet` now includes `RestoreMixin`
+    (adds `deleted`, `restore` endpoints alongside existing ones)
+- updated dev dependencies: black 26.5.1, isort 8.0.1, pylint 4.0.6,
+    sqlparse 0.5.5
+
+## [4.0.0]
 
 ### Potentially BREAKING CHANGES
 

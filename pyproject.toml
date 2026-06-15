@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-reversion-rest-framework"
-version = "4.0.1"
+version = "4.1.0"
 authors = [{name = "Denny Biasiolli", email = "denny.biasiolli@gmail.com"}]
 description = "A package for adding a django-reversion history endpoint to django-rest-framework ModelViewSet"
 license = "MIT"
