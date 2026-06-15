@@ -19,8 +19,14 @@ test-coverage:
 	uv run --frozen coverage html
 	uv run --frozen coverage xml
 
-build:
+clean:
+	rm -rf dist/ docs/_build/
+
+build: clean
 	uv build
 
-publish:
+publish: build
 	uv publish
+
+publish-test: build
+	uv publish --publish-url https://test.pypi.org/legacy/
