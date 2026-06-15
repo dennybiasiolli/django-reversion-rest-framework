@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
 
-from .mixins import DeletedMixin, RevertMixin
+from .mixins import RestoreMixin, RevertMixin
 
 
-class HistoryModelViewSet(RevertMixin, DeletedMixin, ModelViewSet):
+class HistoryModelViewSet(RevertMixin, RestoreMixin, ModelViewSet):
     pass

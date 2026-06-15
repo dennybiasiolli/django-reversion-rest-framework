@@ -39,6 +39,10 @@ The `HistoryModelViewSet` extends django-rest-framework's `ModelViewSet` adding
 
     allowing users to revert to a previous revision of the object
 
+- a POST `restore` action in the list (`/my-model-url/restore/<version_pk>/`)
+
+    allowing users to restore a deleted object from its version history
+
 You can use the `HistoryModelViewSet` in place of the `ModelViewSet`
 during viewsets definition.
 
@@ -55,6 +59,8 @@ For advanced or selective implementation, you can use `reversion_rest_framework.
 - `HistoryMixin` contains `history` and `version` actions
 
 - `DeletedMixin` contains only the `deleted` action
+
+- `RestoreMixin` contains `deleted` and `restore` actions
 
 - `RevertMixin` contains `history`, `version` and `revert` actions
 
