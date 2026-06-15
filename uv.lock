@@ -211,14 +211,14 @@ wheels = [
 
 [[package]]
 name = "django-reversion"
-version = "6.0.0"
+version = "6.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ad/df/5870e38067fd80b3d749de2d11a4cbd32be811d1f43eb8ab948f9f3152c4/django_reversion-6.0.0.tar.gz", hash = "sha256:cab0fd90640b2ceb37d7a897823ca72a21b960ad1d6a3b9cb4e351fabbd27d9c", size = 74528, upload-time = "2025-09-20T08:56:20.119Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9b/8b/72000ad3ba05cb72134f62ad093267e3d83d8fdf1406102d2a1a2ec7d55e/django_reversion-6.1.0.tar.gz", hash = "sha256:31dd7fee02e2a21af7c2d0a61c1c0f27ba07df2317c9a0a3f31d3ee40069025d", size = 76140, upload-time = "2025-12-12T20:23:51.948Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9c/0d/7e558eb30afcdb21eca15a6ef8aa048b6089efc4599e28611275a0643260/django_reversion-6.0.0-py3-none-any.whl", hash = "sha256:0755b4b3e615254b305d01012e426e09006455d375254e5adc29572fc9edf2ab", size = 85968, upload-time = "2025-09-20T08:56:18.761Z" },
+    { url = "https://files.pythonhosted.org/packages/5e/8e/c80904ce5cb94f78cdd7d794cb7b4a8e8891a7515621bbce5f2a45de6555/django_reversion-6.1.0-py3-none-any.whl", hash = "sha256:1f5815791d9accdb0bad9d5982668f217dc65225be57041ae9641dbdcd838ce3", size = 86196, upload-time = "2025-12-12T20:23:50.18Z" },
 ]
 
 [[package]]
