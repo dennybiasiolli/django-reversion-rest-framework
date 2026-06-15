@@ -10,9 +10,26 @@ from reversion.models import Version
 
 from .serializers import VersionSerializer
 
+REVISION_FILTER_FIELDS = {
+    "date_created": "revision__date_created",
+    "date_created__gt": "revision__date_created__gt",
+    "date_created__gte": "revision__date_created__gte",
+    "date_created__lt": "revision__date_created__lt",
+    "date_created__lte": "revision__date_created__lte",
+    "user": "revision__user",
+}
+
 
 class BaseHistoryMixin:
     version_serializer = VersionSerializer
+
+    def _filter_version_queryset(self, request, queryset):
+        """Filter a Version queryset using revision-related query parameters."""
+        for param, lookup in REVISION_FILTER_FIELDS.items():
+            value = request.query_params.get(param)
+            if value is not None:
+                queryset = queryset.filter(**{lookup: value})
+        return queryset
 
     def _build_serializer(
         self, instance_class: type, queryset: QuerySet, many: bool = False
@@ -49,9 +66,9 @@ class HistoryMixin(BaseHistoryMixin):
     @action(detail=True, methods=["GET"], name="Get History")
     def history(self, request, pk=None, *args, **kwargs):
         instance = self.get_object()
-        versions = Version.objects.get_for_object(instance).order_by(
-            "-revision__date_created"
-        )
+        versions = Version.objects.get_for_object(instance)
+        versions = self._filter_version_queryset(request, versions)
+        versions = versions.order_by("-revision__date_created")
         page = self.paginate_queryset(versions)
         if page is not None:
             serializer = self._build_serializer(instance.__class__, page, many=True)
@@ -88,6 +105,7 @@ class DeletedMixin(BaseHistoryMixin):
     def deleted(self, request, *args, **kwargs):
         model = self._get_version_model()
         versions = Version.objects.get_deleted(model)
+        versions = self._filter_version_queryset(request, versions)
         versions = versions.order_by("-revision__date_created")
         page = self.paginate_queryset(versions)
         if page is not None:
