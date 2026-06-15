@@ -3,6 +3,13 @@
 A package for adding a django-reversion history endpoint to django-rest-framework ModelViewSet.
 
 
+## Installation
+
+```sh
+pip install django-reversion-rest-framework
+```
+
+
 ## Configuration
 
 Follow the official website for the installation and the integration of django-reversion in your project, otherwise future steps won't work.
@@ -50,6 +57,16 @@ For advanced or selective implementation, you can use `reversion_rest_framework.
 - `DeletedMixin` contains only the `deleted` action
 
 - `RevertMixin` contains `history`, `version` and `revert` actions
+
+```py
+from rest_framework.viewsets import ModelViewSet
+from reversion_rest_framework.mixins import HistoryMixin, DeletedMixin
+
+
+class ReadOnlyHistoryViewSet(HistoryMixin, DeletedMixin, ModelViewSet):
+    # history + version + deleted, without revert
+    # ...
+```
 
 
 ### Customizing the VersionSerializer

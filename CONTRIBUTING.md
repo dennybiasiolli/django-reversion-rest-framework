@@ -1,7 +1,5 @@
 # Contributing guidelines
 
-This package has been created using python 3.11.6.
-
 ## Creating environment with uv and enabling it
 
 ```sh
