@@ -1,7 +1,7 @@
 style-fix:
-	isort .
-	black .
-	flake8
+	uv run --frozen isort .
+	uv run --frozen black .
+	uv run --frozen flake8
 
 style-check:
 	uv run --frozen pylint --errors-only --recursive=y src
@@ -11,7 +11,7 @@ style-check:
 	uv run --frozen flake8
 
 test:
-	python tests/manage.py test tests
+	uv run --frozen python tests/manage.py test tests
 
 test-coverage:
 	uv run --frozen coverage run tests/manage.py test tests
