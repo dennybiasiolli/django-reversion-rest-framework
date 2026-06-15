@@ -1,5 +1,3 @@
-from typing import Optional
-
 import reversion
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
@@ -16,14 +14,12 @@ from .serializers import VersionSerializer
 class BaseHistoryMixin:
     version_serializer = VersionSerializer
 
-
-class HistoryMixin(BaseHistoryMixin):
     def _build_serializer(
-        self, instance_class: type, queryset: QuerySet, many: Optional[bool] = False
+        self, instance_class: type, queryset: QuerySet, many: bool = False
     ):
         """
         Wraps the original serializer within the Version serializer
-        on the field_dict field
+        on the field_dict field.
         """
 
         class _InstanceSerializer(ModelSerializer):
@@ -36,13 +32,9 @@ class HistoryMixin(BaseHistoryMixin):
 
             @staticmethod
             def get_field_dict(obj):
-                # here we use the transient ModelSerializer to serialize
-                # the json blob returned from the version
                 model_serializer = _InstanceSerializer(data=obj.field_dict)
                 try:
                     model_serializer.is_valid(raise_exception=True)
-                    # we now get the original serializer as specified by the user
-                    # on the viewset, and use it to de-serializer the model-instance
                     original_serializer = self.get_serializer(
                         model_serializer.validated_data
                     )
@@ -52,6 +44,8 @@ class HistoryMixin(BaseHistoryMixin):
 
         return _VersionsSerializer(queryset, many=many)
 
+
+class HistoryMixin(BaseHistoryMixin):
     @action(detail=True, methods=["GET"], name="Get History")
     def history(self, request, pk=None, *args, **kwargs):
         instance = self.get_object()
@@ -111,11 +105,6 @@ class RevertMixin(HistoryMixin):
         url_path=r"revert/(?P<version_pk>\d+)",
     )
     def revert(self, request, pk=None, version_pk=None, *args, **kwargs):
-        if not version_pk:
-            return Response(
-                {"error": "Invalid Version Id"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
         instance = self.get_object()
         versions = Version.objects.get_for_object_reference(instance, pk)
         version = versions.filter(pk=version_pk).first()
@@ -130,7 +119,7 @@ class RevertMixin(HistoryMixin):
             with reversion.create_revision():
                 instance.save()
                 reversion.set_user(request.user)
-                reversion.set_comment("Reverted to version {}".format(version_pk))
+                reversion.set_comment(f"Reverted to version {version_pk}")
         except Exception as e:
             return Response(
                 {"error": "Reverting Failed", "msg": str(e)},
@@ -138,6 +127,3 @@ class RevertMixin(HistoryMixin):
             )
         serializer = self._build_serializer(instance.__class__, version)
         return Response(serializer.data)
-
-
-
