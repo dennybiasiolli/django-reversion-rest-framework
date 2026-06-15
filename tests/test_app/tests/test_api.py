@@ -558,6 +558,86 @@ class TestRestoreViewSetTests(AuthApiTestCase):
         self.assertEqual(len(response.data), 0)
 
 
+class TestFilterHistory(AuthApiTestCase):
+    def test_filter_history_by_user(self):
+        """
+        Ensure history can be filtered by revision user.
+        """
+        url = reverse("testmodel-list")
+        response = self.client.post(url, {"name": "v1"}, format="json")
+        pk = response.data["id"]
+
+        self.client.login(username="user2", password="password")
+        url = reverse("testmodel-detail", kwargs={"pk": pk})
+        self.client.patch(url, {"name": "v2"}, format="json")
+
+        history_url = reverse("testmodel-history", kwargs={"pk": pk})
+
+        response = self.client.get(history_url, format="json")
+        self.assertEqual(len(response.data), 2)
+
+        response = self.client.get(history_url, {"user": self.user1.pk}, format="json")
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["field_dict"]["name"], "v1")
+
+        response = self.client.get(history_url, {"user": self.user2.pk}, format="json")
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["field_dict"]["name"], "v2")
+
+    def test_filter_history_by_date(self):
+        """
+        Ensure history can be filtered by date_created.
+        """
+        url = reverse("testmodel-list")
+        response = self.client.post(url, {"name": "v1"}, format="json")
+        pk = response.data["id"]
+
+        url = reverse("testmodel-detail", kwargs={"pk": pk})
+        self.client.patch(url, {"name": "v2"}, format="json")
+
+        history_url = reverse("testmodel-history", kwargs={"pk": pk})
+
+        response = self.client.get(
+            history_url, {"date_created__gt": "2099-01-01T00:00:00Z"}, format="json"
+        )
+        self.assertEqual(len(response.data), 0)
+
+        response = self.client.get(
+            history_url, {"date_created__lt": "2099-01-01T00:00:00Z"}, format="json"
+        )
+        self.assertEqual(len(response.data), 2)
+
+    def test_filter_deleted_by_user(self):
+        """
+        Ensure deleted list can be filtered by revision user.
+        """
+        url = reverse("testmodel-list")
+        response = self.client.post(url, {"name": "del1"}, format="json")
+        pk1 = response.data["id"]
+
+        self.client.login(username="user2", password="password")
+        response = self.client.post(url, {"name": "del2"}, format="json")
+        pk2 = response.data["id"]
+
+        self.client.login(username="user1", password="password")
+        self.client.delete(
+            reverse("testmodel-detail", kwargs={"pk": pk1}), format="json"
+        )
+        self.client.login(username="user2", password="password")
+        self.client.delete(
+            reverse("testmodel-detail", kwargs={"pk": pk2}), format="json"
+        )
+
+        deleted_url = reverse("testmodel-deleted")
+
+        response = self.client.get(deleted_url, format="json")
+        self.assertEqual(len(response.data), 2)
+
+        response = self.client.get(deleted_url, {"user": self.user1.pk}, format="json")
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["field_dict"]["name"], "del1")
+
+
 class TestUnauthenticatedAccess(APITestCase):
     def test_list_requires_auth(self):
         """
