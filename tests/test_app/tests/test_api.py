@@ -484,6 +484,50 @@ class TestLimitedModelViewSetTests(AuthApiTestCase):
         self.assertEqual(response.data[2]["field_dict"]["name"], "Foo 1.2.0")
 
 
+class TestRevertErrorCases(AuthApiTestCase):
+    def test_revert_version_not_found(self):
+        """
+        Ensure reverting with a non-existent version_pk returns 404.
+        """
+        url = reverse("testmodel-list")
+        response = self.client.post(url, {"name": "Original"}, format="json")
+        pk = response.data["id"]
+
+        url = reverse(
+            "testmodel-revert",
+            kwargs={"pk": pk, "version_pk": 99999},
+        )
+        response = self.client.post(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["error"], "Version Not Found")
+
+
+class TestUnauthenticatedAccess(APITestCase):
+    def test_list_requires_auth(self):
+        """
+        Ensure unauthenticated users get 403.
+        """
+        url = reverse("testmodel-list")
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_history_requires_auth(self):
+        """
+        Ensure unauthenticated users cannot access history.
+        """
+        url = reverse("testmodel-history", kwargs={"pk": 1})
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_deleted_requires_auth(self):
+        """
+        Ensure unauthenticated users cannot access deleted.
+        """
+        url = reverse("testmodel-deleted")
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
 class TestCustomParamUrls(AuthApiTestCase):
     def setUp(self):
         super().setUp()
