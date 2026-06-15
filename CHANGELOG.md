@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## [4.0.0]
+
+### Potentially BREAKING CHANGES
+
+- removed deprecated classes: `BaseHistoryModelMixin`, `HistoryOnlyMixin`,
+    `DeletedOnlyMixin`, `ReadOnlyHistoryModel`, `HistoryModelMixin`.
+    Use `BaseHistoryMixin`, `HistoryMixin`, `DeletedMixin`, and `RevertMixin` instead
+
+### Changed
+
+- moved `_build_serializer` from `HistoryMixin` to `BaseHistoryMixin`,
+    allowing `DeletedMixin` to work independently without requiring `HistoryMixin`
+- removed unreachable `version_pk` validation in `revert` action
+    (URL regex already guarantees a valid value)
+- removed redundant `setup.cfg` (all metadata is in `pyproject.toml`)
+- used `uv run` consistently in all Makefile targets
+- added Python version classifiers (3.10-3.14) and Django REST Framework classifier
+- added installation instructions and mixin usage example to README
+- updated CONTRIBUTING.md, removed outdated boilerplate from test project settings
+- added tests for revert error handling and unauthenticated access (22 → 26 tests)
+- improved test coverage from 98% to 99%
+
 ## [3.0.0]
 
 ### Potentially BREAKING CHANGES
