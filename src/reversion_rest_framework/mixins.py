@@ -37,12 +37,29 @@ class BaseHistoryMixin:
         """
         Wraps the original serializer within the Version serializer
         on the field_dict field.
+
+        Historical snapshots are deserialized only to coerce types and apply
+        the view's serializer representation. Uniqueness and other create/update
+        validators are not appropriate here and would fail for existing rows
+        (see #141).
         """
 
         class _InstanceSerializer(ModelSerializer):
             class Meta:
                 model = instance_class
                 fields = "__all__"
+
+            def get_validators(self):
+                # Do not run model-level validators (e.g. unique_together).
+                return []
+
+            def build_standard_field(self, field_name, model_field):
+                field_class, field_kwargs = super().build_standard_field(
+                    field_name, model_field
+                )
+                # Strip field-level UniqueValidator etc.; this is not a write path.
+                field_kwargs.pop("validators", None)
+                return field_class, field_kwargs
 
         class _VersionsSerializer(self.version_serializer):
             field_dict = SerializerMethodField()

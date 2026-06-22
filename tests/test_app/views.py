@@ -2,13 +2,14 @@ from rest_framework import permissions
 
 from reversion_rest_framework.viewsets import HistoryModelViewSet
 
-from .models import TestLimitedModel, TestModel, TestParentModel
+from .models import TestLimitedModel, TestModel, TestParentModel, TestUniqueModel
 from .pagination import MyPageNumberPagination
 from .serializers import (
     CustomVersionSerializer,
     ParentTestModelSerializer,
     TestLimitedModelSerializer,
     TestModelSerializer,
+    TestUniqueModelSerializer,
 )
 
 
@@ -61,4 +62,15 @@ class TestLimitedModelViewSet(HistoryModelViewSet):
 
     queryset = TestLimitedModel.objects.all()
     serializer_class = TestLimitedModelSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class TestUniqueModelViewSet(HistoryModelViewSet):
+    """
+    API endpoint with a unique field and custom serializer representation.
+    Regression for #141: serializer_class must apply even when the row exists.
+    """
+
+    queryset = TestUniqueModel.objects.all()
+    serializer_class = TestUniqueModelSerializer
     permission_classes = [permissions.IsAuthenticated]

@@ -16,3 +16,11 @@ class TestParentModel(models.Model):
 class TestLimitedModel(models.Model):
     name = models.CharField(max_length=10)
     description = models.CharField(max_length=100)
+
+
+@reversion.register()
+class TestUniqueModel(models.Model):
+    """Model with a unique field; reproduces issue #141."""
+
+    code = models.CharField(max_length=10, unique=True)
+    name = models.CharField(max_length=50)

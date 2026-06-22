@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [Unreleased]
+
+### Fixed
+
+- history/deleted `field_dict` now applies the view's `serializer_class` even
+    when the model has unique constraints; intermediate deserialization no longer
+    runs create/update uniqueness validators that would fail for existing rows (#141)
+
 ## [4.1.0]
 
 ### Added

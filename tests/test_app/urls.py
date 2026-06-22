@@ -7,6 +7,7 @@ from .views import (
     TestModelPaginatedViewSet,
     TestModelViewSet,
     TestParentModelViewSet,
+    TestUniqueModelViewSet,
 )
 
 # Create a router and register our viewsets with it.
@@ -23,6 +24,9 @@ router.register(
 )
 router.register(
     "test-limited-models", TestLimitedModelViewSet, basename="testlimitedmodel"
+)
+router.register(
+    "test-unique-models", TestUniqueModelViewSet, basename="testuniquemodel"
 )
 
 

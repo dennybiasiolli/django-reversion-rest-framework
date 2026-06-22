@@ -484,6 +484,53 @@ class TestLimitedModelViewSetTests(AuthApiTestCase):
         self.assertEqual(response.data[2]["field_dict"]["name"], "Foo 1.2.0")
 
 
+class TestUniqueModelSerializerViewSetTests(AuthApiTestCase):
+    """
+    Regression for #141: when the model has unique fields, history must still
+    apply serializer_class instead of falling back to raw field_dict.
+    """
+
+    def test_history_uses_serializer_class_with_unique_fields(self):
+        url = reverse("testuniquemodel-list")
+        response = self.client.post(
+            url, {"code": "ABC", "name": "Alpha"}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        pk = response.data["id"]
+
+        url = reverse("testuniquemodel-detail", kwargs={"pk": pk})
+        response = self.client.patch(url, {"name": "Beta"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        url = reverse("testuniquemodel-history", kwargs={"pk": pk})
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+        # Custom SerializerMethodField from serializer_class must be present;
+        # without the fix, uniqueness validation fails and field_dict is raw.
+        self.assertEqual(response.data[0]["field_dict"]["name"], "Beta")
+        self.assertEqual(response.data[0]["field_dict"]["display_name"], "CODE:Beta")
+        self.assertEqual(response.data[0]["field_dict"]["code"], "ABC")
+        self.assertEqual(response.data[1]["field_dict"]["name"], "Alpha")
+        self.assertEqual(response.data[1]["field_dict"]["display_name"], "CODE:Alpha")
+
+    def test_deleted_uses_serializer_class_with_unique_fields(self):
+        url = reverse("testuniquemodel-list")
+        response = self.client.post(url, {"code": "DEL", "name": "Gone"}, format="json")
+        pk = response.data["id"]
+
+        url = reverse("testuniquemodel-detail", kwargs={"pk": pk})
+        self.client.delete(url, format="json")
+
+        url = reverse("testuniquemodel-deleted")
+        response = self.client.get(url, format="json")
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["field_dict"]["name"], "Gone")
+        self.assertEqual(response.data[0]["field_dict"]["display_name"], "CODE:Gone")
+        self.assertEqual(response.data[0]["field_dict"]["code"], "DEL")
+
+
 class TestRevertErrorCases(AuthApiTestCase):
     def test_revert_version_not_found(self):
         """

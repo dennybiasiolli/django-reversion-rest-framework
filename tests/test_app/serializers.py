@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from reversion_rest_framework.serializers import RevisionSerializer, VersionSerializer
 
-from .models import TestLimitedModel, TestModel, TestParentModel
+from .models import TestLimitedModel, TestModel, TestParentModel, TestUniqueModel
 
 
 class TestModelSerializer(serializers.ModelSerializer):
@@ -62,3 +62,17 @@ class TestLimitedModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestLimitedModel
         fields = ["id", "name", "description"]
+
+
+class TestUniqueModelSerializer(serializers.ModelSerializer):
+    """Custom representation that uppercases the name in history output."""
+
+    display_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TestUniqueModel
+        fields = ["id", "code", "name", "display_name"]
+
+    def get_display_name(self, obj):
+        name = obj["name"] if isinstance(obj, dict) else obj.name
+        return f"CODE:{name}"
