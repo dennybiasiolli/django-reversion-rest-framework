@@ -531,6 +531,79 @@ class TestUniqueModelSerializerViewSetTests(AuthApiTestCase):
         self.assertEqual(response.data[0]["field_dict"]["code"], "DEL")
 
 
+class TestUniqueTogetherModelSerializerViewSetTests(AuthApiTestCase):
+    """
+    Regression for #141: unique_together and relation labels in serializer_class
+    must appear in field_dict for /history/ and /deleted/.
+    """
+
+    def test_history_uses_serializer_class_with_unique_together_and_relation_label(
+        self,
+    ):
+        related = TestModel.objects.create(name="RelatedItem")
+        url = reverse("testuniquetogethermodel-list")
+        response = self.client.post(
+            url,
+            {
+                "category": "cat",
+                "code": "X1",
+                "name": "First",
+                "related": related.pk,
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        pk = response.data["id"]
+
+        url = reverse("testuniquetogethermodel-detail", kwargs={"pk": pk})
+        response = self.client.patch(url, {"name": "Second"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        url = reverse("testuniquetogethermodel-history", kwargs={"pk": pk})
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+        # SerializerMethodField + relation label from serializer_class must appear;
+        # without the fix, unique_together validation fails and field_dict is raw.
+        self.assertEqual(response.data[0]["field_dict"]["name"], "Second")
+        self.assertEqual(response.data[0]["field_dict"]["display_name"], "UT:Second")
+        self.assertEqual(response.data[0]["field_dict"]["related_name"], "RelatedItem")
+        self.assertEqual(response.data[0]["field_dict"]["related"], related.pk)
+        self.assertEqual(response.data[1]["field_dict"]["name"], "First")
+        self.assertEqual(response.data[1]["field_dict"]["display_name"], "UT:First")
+        self.assertEqual(response.data[1]["field_dict"]["related_name"], "RelatedItem")
+
+    def test_deleted_uses_serializer_class_with_unique_together_and_relation_label(
+        self,
+    ):
+        related = TestModel.objects.create(name="DelRelated")
+        url = reverse("testuniquetogethermodel-list")
+        response = self.client.post(
+            url,
+            {
+                "category": "cat",
+                "code": "Y1",
+                "name": "Gone",
+                "related": related.pk,
+            },
+            format="json",
+        )
+        pk = response.data["id"]
+
+        url = reverse("testuniquetogethermodel-detail", kwargs={"pk": pk})
+        self.client.delete(url, format="json")
+
+        url = reverse("testuniquetogethermodel-deleted")
+        response = self.client.get(url, format="json")
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["field_dict"]["name"], "Gone")
+        self.assertEqual(response.data[0]["field_dict"]["display_name"], "UT:Gone")
+        self.assertEqual(response.data[0]["field_dict"]["related_name"], "DelRelated")
+        self.assertEqual(response.data[0]["field_dict"]["category"], "cat")
+        self.assertEqual(response.data[0]["field_dict"]["code"], "Y1")
+
+
 class TestRevertErrorCases(AuthApiTestCase):
     def test_revert_version_not_found(self):
         """

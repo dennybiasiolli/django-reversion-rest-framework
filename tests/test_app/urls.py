@@ -8,6 +8,7 @@ from .views import (
     TestModelViewSet,
     TestParentModelViewSet,
     TestUniqueModelViewSet,
+    TestUniqueTogetherModelViewSet,
 )
 
 # Create a router and register our viewsets with it.
@@ -27,6 +28,11 @@ router.register(
 )
 router.register(
     "test-unique-models", TestUniqueModelViewSet, basename="testuniquemodel"
+)
+router.register(
+    "test-unique-together-models",
+    TestUniqueTogetherModelViewSet,
+    basename="testuniquetogethermodel",
 )
 
 

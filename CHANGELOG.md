@@ -7,6 +7,8 @@
 - history/deleted `field_dict` now applies the view's `serializer_class` even
     when the model has unique constraints; intermediate deserialization no longer
     runs create/update uniqueness validators that would fail for existing rows (#141)
+- intermediate history deserialization normalizes reversion attnames (e.g. `related_id`)
+    to model field names so FK/relation labels in `serializer_class` work in `field_dict`
 
 ## [4.1.0]
 

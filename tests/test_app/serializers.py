@@ -3,7 +3,13 @@ from rest_framework import serializers
 
 from reversion_rest_framework.serializers import RevisionSerializer, VersionSerializer
 
-from .models import TestLimitedModel, TestModel, TestParentModel, TestUniqueModel
+from .models import (
+    TestLimitedModel,
+    TestModel,
+    TestParentModel,
+    TestUniqueModel,
+    TestUniqueTogetherModel,
+)
 
 
 class TestModelSerializer(serializers.ModelSerializer):
@@ -76,3 +82,42 @@ class TestUniqueModelSerializer(serializers.ModelSerializer):
     def get_display_name(self, obj):
         name = obj["name"] if isinstance(obj, dict) else obj.name
         return f"CODE:{name}"
+
+
+class TestUniqueTogetherModelSerializer(serializers.ModelSerializer):
+    """Custom representation with SerializerMethodField and relation label."""
+
+    display_name = serializers.SerializerMethodField()
+    related_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TestUniqueTogetherModel
+        fields = [
+            "id",
+            "category",
+            "code",
+            "name",
+            "related",
+            "display_name",
+            "related_name",
+        ]
+
+    def get_display_name(self, obj):
+        name = obj["name"] if isinstance(obj, dict) else obj.name
+        return f"UT:{name}"
+
+    def get_related_name(self, obj):
+        if isinstance(obj, dict):
+            related = obj.get("related")
+            if related is None:
+                return None
+            # Intermediate deserialization may yield a model instance or a pk.
+            if isinstance(related, TestModel):
+                return related.name
+            try:
+                return TestModel.objects.get(pk=related).name
+            except TestModel.DoesNotExist:
+                return None
+        if obj.related_id is None:
+            return None
+        return obj.related.name

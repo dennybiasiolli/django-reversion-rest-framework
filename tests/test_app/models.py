@@ -24,3 +24,18 @@ class TestUniqueModel(models.Model):
 
     code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=50)
+
+
+@reversion.register()
+class TestUniqueTogetherModel(models.Model):
+    """Model with unique_together; reproduces issue #141 for multi-field constraints."""
+
+    category = models.CharField(max_length=10)
+    code = models.CharField(max_length=10)
+    name = models.CharField(max_length=50)
+    related = models.ForeignKey(
+        TestModel, on_delete=models.CASCADE, null=True, blank=True
+    )
+
+    class Meta:
+        unique_together = [("category", "code")]

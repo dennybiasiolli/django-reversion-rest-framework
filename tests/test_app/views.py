@@ -2,7 +2,13 @@ from rest_framework import permissions
 
 from reversion_rest_framework.viewsets import HistoryModelViewSet
 
-from .models import TestLimitedModel, TestModel, TestParentModel, TestUniqueModel
+from .models import (
+    TestLimitedModel,
+    TestModel,
+    TestParentModel,
+    TestUniqueModel,
+    TestUniqueTogetherModel,
+)
 from .pagination import MyPageNumberPagination
 from .serializers import (
     CustomVersionSerializer,
@@ -10,6 +16,7 @@ from .serializers import (
     TestLimitedModelSerializer,
     TestModelSerializer,
     TestUniqueModelSerializer,
+    TestUniqueTogetherModelSerializer,
 )
 
 
@@ -73,4 +80,15 @@ class TestUniqueModelViewSet(HistoryModelViewSet):
 
     queryset = TestUniqueModel.objects.all()
     serializer_class = TestUniqueModelSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class TestUniqueTogetherModelViewSet(HistoryModelViewSet):
+    """
+    API endpoint with unique_together and relation labels in serializer_class.
+    Regression for #141: serializer_class must apply for multi-field constraints.
+    """
+
+    queryset = TestUniqueTogetherModel.objects.all()
+    serializer_class = TestUniqueTogetherModelSerializer
     permission_classes = [permissions.IsAuthenticated]

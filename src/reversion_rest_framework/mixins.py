@@ -61,12 +61,23 @@ class BaseHistoryMixin:
                 field_kwargs.pop("validators", None)
                 return field_class, field_kwargs
 
+        def _normalize_field_dict(field_dict):
+            """Map reversion attnames (e.g. related_id) to field names (related)."""
+            data = dict(field_dict)
+            for field in instance_class._meta.fields:
+                attname = field.attname
+                if attname != field.name and attname in data and field.name not in data:
+                    data[field.name] = data[attname]
+            return data
+
         class _VersionsSerializer(self.version_serializer):
             field_dict = SerializerMethodField()
 
             @staticmethod
             def get_field_dict(obj):
-                model_serializer = _InstanceSerializer(data=obj.field_dict)
+                model_serializer = _InstanceSerializer(
+                    data=_normalize_field_dict(obj.field_dict)
+                )
                 try:
                     model_serializer.is_valid(raise_exception=True)
                     original_serializer = self.get_serializer(
