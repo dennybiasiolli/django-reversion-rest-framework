@@ -2,6 +2,15 @@
 
 A package for adding a django-reversion history endpoint to django-rest-framework ModelViewSet.
 
+## Requirements
+
+- Python 3.10+
+- Django 5.2, 6.0, or 6.1
+- django-reversion 4+
+- djangorestframework 3+
+
+Django 6.1 requires `djangorestframework>=3.18`.
+
 
 ## Installation
 

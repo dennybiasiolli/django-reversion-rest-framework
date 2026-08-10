@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## [4.1.1]
+
+### Changed
+
+- confirmed compatibility with Django 6.1 (requires
+    `djangorestframework>=3.18`)
+- updated `djangorestframework` to 3.18.0
+- added Django 5.2, 6.0, and 6.1 framework classifiers
+
 ## [4.1.0]
 
 ### Added

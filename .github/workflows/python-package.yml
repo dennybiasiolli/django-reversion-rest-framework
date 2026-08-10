@@ -33,3 +33,7 @@ jobs:
       run: |
         make style-check
         make test-coverage
+    - name: Test Django 6.1
+      if: ${{ !contains(fromJSON('["3.10", "3.11"]'), matrix.python-version) }}
+      run: |
+        uv run --with 'django~=6.1.0' --with 'djangorestframework>=3.18' python tests/manage.py test tests
