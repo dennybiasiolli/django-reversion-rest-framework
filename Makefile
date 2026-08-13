@@ -1,14 +1,10 @@
 style-fix:
-	uv run --frozen isort .
-	uv run --frozen black .
-	uv run --frozen flake8
+	uv run --frozen ruff check --fix .
+	uv run --frozen ruff format .
 
 style-check:
-	uv run --frozen pylint --errors-only --recursive=y src
-	uv run --frozen pylint --load-plugins pylint_django --django-settings-module=test_project.settings --errors-only --recursive=y tests
-	uv run --frozen isort --check-only .
-	uv run --frozen black --check --diff .
-	uv run --frozen flake8
+	uv run --frozen ruff check .
+	uv run --frozen ruff format --check .
 
 test:
 	uv run --frozen python tests/manage.py test tests
