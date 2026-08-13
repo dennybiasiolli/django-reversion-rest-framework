@@ -14,7 +14,7 @@ class MixinsTests(TestCase):
         class TestViewSet(mixins.BaseHistoryMixin, GenericViewSet):
             pass
 
-        url_paths = list(action.url_path for action in TestViewSet.get_extra_actions())
+        url_paths = [action.url_path for action in TestViewSet.get_extra_actions()]
         self.assertEqual(len(url_paths), 0)
         self.assertEqual(TestViewSet.version_serializer, VersionSerializer)
 
@@ -26,7 +26,7 @@ class MixinsTests(TestCase):
         class TestViewSet(mixins.HistoryMixin, GenericViewSet):
             pass
 
-        url_paths = list(action.url_path for action in TestViewSet.get_extra_actions())
+        url_paths = [action.url_path for action in TestViewSet.get_extra_actions()]
         self.assertTrue(issubclass(mixins.HistoryMixin, mixins.BaseHistoryMixin))
         self.assertEqual(len(url_paths), 2)
         self.assertTrue("history" in url_paths)
@@ -40,7 +40,7 @@ class MixinsTests(TestCase):
         class TestViewSet(mixins.DeletedMixin, GenericViewSet):
             pass
 
-        url_paths = list(action.url_path for action in TestViewSet.get_extra_actions())
+        url_paths = [action.url_path for action in TestViewSet.get_extra_actions()]
         self.assertTrue(issubclass(mixins.DeletedMixin, mixins.BaseHistoryMixin))
         self.assertIsNone(TestViewSet.version_model)
         self.assertEqual(len(url_paths), 1)
@@ -54,7 +54,7 @@ class MixinsTests(TestCase):
         class TestViewSet(mixins.HistoryMixin, mixins.DeletedMixin, GenericViewSet):
             pass
 
-        url_paths = list(action.url_path for action in TestViewSet.get_extra_actions())
+        url_paths = [action.url_path for action in TestViewSet.get_extra_actions()]
         self.assertEqual(len(url_paths), 3)
         self.assertTrue("history" in url_paths)
         self.assertTrue("deleted" in url_paths)
@@ -67,7 +67,7 @@ class MixinsTests(TestCase):
         class TestViewSet(mixins.RevertMixin, GenericViewSet):
             pass
 
-        url_paths = list(action.url_path for action in TestViewSet.get_extra_actions())
+        url_paths = [action.url_path for action in TestViewSet.get_extra_actions()]
         self.assertTrue(issubclass(mixins.RevertMixin, mixins.HistoryMixin))
         self.assertEqual(len(url_paths), 3)
         self.assertTrue("history" in url_paths)
@@ -82,7 +82,7 @@ class MixinsTests(TestCase):
         class TestViewSet(mixins.RestoreMixin, GenericViewSet):
             pass
 
-        url_paths = list(action.url_path for action in TestViewSet.get_extra_actions())
+        url_paths = [action.url_path for action in TestViewSet.get_extra_actions()]
         self.assertTrue(issubclass(mixins.RestoreMixin, mixins.DeletedMixin))
         self.assertEqual(len(url_paths), 2)
         self.assertTrue("deleted" in url_paths)
@@ -96,7 +96,7 @@ class MixinsTests(TestCase):
         class TestViewSet(mixins.RevertMixin, mixins.RestoreMixin, GenericViewSet):
             pass
 
-        url_paths = list(action.url_path for action in TestViewSet.get_extra_actions())
+        url_paths = [action.url_path for action in TestViewSet.get_extra_actions()]
         self.assertEqual(len(url_paths), 5)
         self.assertTrue("history" in url_paths)
         self.assertTrue(r"history/(?P<version_pk>\d+)" in url_paths)

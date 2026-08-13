@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## [4.1.2]
+
+### Changed
+
+- migrated dev lint/format tooling from black, isort, flake8, and pylint
+    to [ruff](https://docs.astral.sh/ruff/) (`make style-check` /
+    `make style-fix`)
+- `get_field_dict` no longer catches bare `Exception`; falls back to raw
+    `field_dict` only for expected serializer failures
+    (`ValidationError`, `TypeError`, `ValueError`, `AttributeError`,
+    `KeyError`)
+- `restore` and `revert` no longer catch bare `Exception`; return 400 only
+    for expected reversion/DB failures (`RevertError`,
+    `RevisionManagementError`, `DatabaseError`, `ObjectDoesNotExist`)
+
 ## [4.1.1]
 
 ### Changed

@@ -1,11 +1,15 @@
 import reversion
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
+from reversion.errors import RevertError, RevisionManagementError
 from reversion.models import Version
 
 from .serializers import VersionSerializer
@@ -56,7 +60,13 @@ class BaseHistoryMixin:
                         model_serializer.validated_data
                     )
                     return original_serializer.data
-                except Exception:
+                except (
+                    ValidationError,
+                    TypeError,
+                    ValueError,
+                    AttributeError,
+                    KeyError,
+                ):
                     return obj.field_dict
 
         return _VersionsSerializer(queryset, many=many)
@@ -139,7 +149,12 @@ class RestoreMixin(DeletedMixin):
                 instance.save()
                 reversion.set_user(request.user)
                 reversion.set_comment(f"Restored from version {version_pk}")
-        except Exception as e:
+        except (
+            RevertError,
+            RevisionManagementError,
+            DatabaseError,
+            ObjectDoesNotExist,
+        ) as e:
             return Response(
                 {"error": "Restoring Failed", "msg": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -171,7 +186,12 @@ class RevertMixin(HistoryMixin):
                 instance.save()
                 reversion.set_user(request.user)
                 reversion.set_comment(f"Reverted to version {version_pk}")
-        except Exception as e:
+        except (
+            RevertError,
+            RevisionManagementError,
+            DatabaseError,
+            ObjectDoesNotExist,
+        ) as e:
             return Response(
                 {"error": "Reverting Failed", "msg": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
