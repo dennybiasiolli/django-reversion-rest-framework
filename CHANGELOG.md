@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [Unreleased]
+## [5.0.0]
 
 ### Potentially BREAKING CHANGES
 

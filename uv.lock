@@ -175,7 +175,7 @@ wheels = [
 
 [[package]]
 name = "django-reversion-rest-framework"
-version = "4.1.2"
+version = "5.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "django-reversion" },
