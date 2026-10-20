@@ -629,7 +629,7 @@ class TestFilterHistory(AuthApiTestCase):
             reverse("testmodel-detail", kwargs={"pk": pk2}), format="json"
         )
 
-        deleted_url = reverse("testmodel-deleted")
+        deleted_url = reverse("testmodel-all-deleted-deleted")
 
         response = self.client.get(deleted_url, format="json")
         self.assertEqual(len(response.data), 2)
@@ -637,6 +637,93 @@ class TestFilterHistory(AuthApiTestCase):
         response = self.client.get(deleted_url, {"user": self.user1.pk}, format="json")
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["field_dict"]["name"], "del1")
+
+
+class TestDeletedScoping(AuthApiTestCase):
+    def _create_and_delete(self, name):
+        url = reverse("testmodel-list")
+        pk = self.client.post(url, {"name": name}, format="json").data["id"]
+        self.client.delete(reverse("testmodel-detail", kwargs={"pk": pk}))
+        return pk
+
+    def test_deleted_lists_only_own_revisions(self):
+        """
+        Ensure a user doesn't see deleted versions created by another user.
+        """
+        self._create_and_delete("mine")
+        self.client.login(username="user2", password="password")
+        self._create_and_delete("theirs")
+
+        response = self.client.get(reverse("testmodel-deleted"), format="json")
+        self.assertEqual([v["field_dict"]["name"] for v in response.data], ["theirs"])
+
+    def test_cannot_restore_other_users_deleted_version(self):
+        """
+        Ensure a user can't restore a deleted version created by another user.
+        """
+        pk = self._create_and_delete("mine")
+        version_pk = self.client.get(reverse("testmodel-deleted")).data[0]["id"]
+
+        self.client.login(username="user2", password="password")
+        url = reverse("testmodel-restore", kwargs={"version_pk": version_pk})
+        response = self.client.post(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertFalse(TestModel.objects.filter(pk=pk).exists())
+
+    def test_deleted_scoped_to_last_saver_not_deleter(self):
+        """
+        Ensure deleted versions belong to whoever saved the object last.
+        """
+        url = reverse("testmodel-list")
+        pk = self.client.post(url, {"name": "shared"}, format="json").data["id"]
+        detail_url = reverse("testmodel-detail", kwargs={"pk": pk})
+        self.client.login(username="user2", password="password")
+        self.client.patch(detail_url, {"name": "edited"}, format="json")
+        self.client.login(username="user1", password="password")
+        self.client.delete(detail_url)
+
+        response = self.client.get(reverse("testmodel-deleted"), format="json")
+        self.assertEqual(response.data, [])
+
+        self.client.login(username="user2", password="password")
+        response = self.client.get(reverse("testmodel-deleted"), format="json")
+        self.assertEqual([v["field_dict"]["name"] for v in response.data], ["edited"])
+
+    def test_restore_outside_get_queryset_is_rolled_back(self):
+        """
+        Ensure restore fails when the restored object isn't in get_queryset().
+        """
+        pk = self._create_and_delete("hidden")
+        version_pk = self.client.get(reverse("testmodel-deleted")).data[0]["id"]
+
+        url = reverse("testmodel-scoped-restore", kwargs={"version_pk": version_pk})
+        response = self.client.post(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertFalse(TestModel.objects.filter(pk=pk).exists())
+
+    def test_restore_inside_get_queryset_succeeds(self):
+        """
+        Ensure restore works when the restored object is in get_queryset().
+        """
+        pk = self._create_and_delete("visible")
+        version_pk = self.client.get(reverse("testmodel-deleted")).data[0]["id"]
+
+        url = reverse("testmodel-scoped-restore", kwargs={"version_pk": version_pk})
+        response = self.client.post(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(TestModel.objects.filter(pk=pk).exists())
+
+    def test_overridden_get_deleted_versions_widens_scope(self):
+        """
+        Ensure overriding get_deleted_versions exposes every deleted version.
+        """
+        self._create_and_delete("mine")
+        self.client.login(username="user2", password="password")
+
+        response = self.client.get(
+            reverse("testmodel-all-deleted-deleted"), format="json"
+        )
+        self.assertEqual([v["field_dict"]["name"] for v in response.data], ["mine"])
 
 
 class TestUnauthenticatedAccess(APITestCase):

@@ -3,8 +3,10 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     TestLimitedModelViewSet,
+    TestModelAllDeletedViewSet,
     TestModelCustomSerializerViewSet,
     TestModelPaginatedViewSet,
+    TestModelScopedViewSet,
     TestModelViewSet,
     TestParentModelViewSet,
 )
@@ -14,6 +16,14 @@ router = DefaultRouter()
 router.register("test-models", TestModelViewSet)
 router.register(
     "test-models-custom", TestModelCustomSerializerViewSet, basename="testmodelcustom"
+)
+router.register(
+    "test-models-all-deleted",
+    TestModelAllDeletedViewSet,
+    basename="testmodel-all-deleted",
+)
+router.register(
+    "test-models-scoped", TestModelScopedViewSet, basename="testmodel-scoped"
 )
 router.register(
     "test-models-paginated", TestModelPaginatedViewSet, basename="testmodelpaginated"

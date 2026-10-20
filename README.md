@@ -42,7 +42,7 @@ The `HistoryModelViewSet` extends django-rest-framework's `ModelViewSet` adding
 
 - a GET `deleted` action in the list (`/my-model-url/deleted/`)
 
-    displaying a list of all deleted records
+    displaying a list of deleted records (see [Scoping deleted records](#scoping-deleted-records))
 
 - a POST `revert` action in the detail (`/my-model-url/<pk>/revert/<version_pk>/`)
 
@@ -81,6 +81,33 @@ from reversion_rest_framework.mixins import HistoryMixin, DeletedMixin
 class ReadOnlyHistoryViewSet(HistoryMixin, DeletedMixin, ModelViewSet):
     # history + version + deleted, without revert
     # ...
+```
+
+
+### Scoping deleted records
+
+Deleted objects are no longer in the database, so `get_queryset()` can't
+scope the `deleted` and `restore` actions. Both use `get_deleted_versions()`.
+django-reversion doesn't record deletions, so a deleted record's version is
+the one from its last save: by default `get_deleted_versions()` returns only
+the deleted records last saved by the requesting user (none for anonymous
+users). Records last saved without a user (e.g. from a management command)
+are not returned.
+
+`restore` also checks the restored record against `get_queryset()`: if the
+record isn't in it, the restore is rolled back and a 404 is returned.
+
+Override it to match your access rules, for example to let every user see
+every deleted record:
+
+```py
+from reversion.models import Version
+from reversion_rest_framework.viewsets import HistoryModelViewSet
+
+
+class MyModelViewSet(HistoryModelViewSet):
+    def get_deleted_versions(self):
+        return Version.objects.get_deleted(MyModel)
 ```
 
 

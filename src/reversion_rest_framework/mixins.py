@@ -1,6 +1,6 @@
 import reversion
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import DatabaseError
+from django.db import DatabaseError, transaction
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -111,10 +111,28 @@ class DeletedMixin(BaseHistoryMixin):
         if issubclass(serializer_class, ModelSerializer):
             return serializer_class.Meta.model
 
+    def get_deleted_versions(self):
+        """
+        Return the deleted versions visible to the current request.
+
+        Deleted objects are no longer in the database, so `get_queryset()`
+        can't scope them. django-reversion doesn't record deletions: the
+        deleted version is the object's last saved one. By default only
+        objects last saved by the requesting user are returned. Override to
+        widen or narrow it,
+        e.g. `return Version.objects.get_deleted(self._get_version_model())`
+        for viewsets where every user may see every deleted record.
+        """
+        user = self.request.user
+        if not user.is_authenticated:
+            return Version.objects.none()
+        model = self._get_version_model()
+        return Version.objects.get_deleted(model).filter(revision__user=user)
+
     @action(detail=False, methods=["GET"], name="Get Deleted")
     def deleted(self, request, *args, **kwargs):
         model = self._get_version_model()
-        versions = Version.objects.get_deleted(model)
+        versions = self.get_deleted_versions()
         versions = self._filter_version_queryset(request, versions)
         versions = versions.order_by("-revision__date_created")
         page = self.paginate_queryset(versions)
@@ -134,26 +152,33 @@ class RestoreMixin(DeletedMixin):
     )
     def restore(self, request, version_pk=None, *args, **kwargs):
         """Restore a deleted model instance from a version."""
-        model = self._get_version_model()
-        deleted_versions = Version.objects.get_deleted(model)
-        version = deleted_versions.filter(pk=version_pk).first()
+        version = self.get_deleted_versions().filter(pk=version_pk).first()
         if not version:
             return Response(
                 {"error": "Version Not Found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         try:
-            version.revision.revert()
-            with reversion.create_revision():
-                instance = model.objects.get(pk=version.object_id)
-                instance.save()
-                reversion.set_user(request.user)
-                reversion.set_comment(f"Restored from version {version_pk}")
+            with transaction.atomic(using=version.db):
+                version.revision.revert()
+                # The restored object must be reachable through get_queryset(),
+                # otherwise the restore is rolled back.
+                try:
+                    instance = self.get_queryset().get(pk=version.object_id)
+                except ObjectDoesNotExist:
+                    transaction.set_rollback(True, using=version.db)
+                    return Response(
+                        {"error": "Version Not Found"},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+                with reversion.create_revision():
+                    instance.save()
+                    reversion.set_user(request.user)
+                    reversion.set_comment(f"Restored from version {version_pk}")
         except (
             RevertError,
             RevisionManagementError,
             DatabaseError,
-            ObjectDoesNotExist,
         ) as e:
             return Response(
                 {"error": "Restoring Failed", "msg": str(e)},
