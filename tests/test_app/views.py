@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from reversion.models import Version
 
 from reversion_rest_framework.viewsets import HistoryModelViewSet
 
@@ -31,6 +32,27 @@ class TestModelCustomSerializerViewSet(HistoryModelViewSet):
     serializer_class = TestModelSerializer
     permission_classes = [permissions.IsAuthenticated]
     version_serializer = CustomVersionSerializer
+
+
+class TestModelAllDeletedViewSet(HistoryModelViewSet):
+    """
+    API endpoint exposing every deleted version, regardless of revision user.
+    """
+
+    queryset = TestModel.objects.all()
+    serializer_class = TestModelSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_deleted_versions(self):
+        return Version.objects.get_deleted(TestModel)
+
+
+class TestModelScopedViewSet(TestModelAllDeletedViewSet):
+    """
+    API endpoint whose get_queryset() hides some objects.
+    """
+
+    queryset = TestModel.objects.exclude(name="hidden")
 
 
 class TestModelPaginatedViewSet(HistoryModelViewSet):

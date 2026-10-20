@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [5.0.0]
+
+### Potentially BREAKING CHANGES
+
+- `deleted` and `restore` now only expose deleted records last saved by
+    the requesting user (none for anonymous users).
+    Previously they listed and restored deleted versions of every user,
+    ignoring the viewset's `get_queryset()` scoping
+- new `get_deleted_versions()` hook on `DeletedMixin` to customize which
+    deleted versions `deleted` and `restore` can reach
+- `restore` rolls back and returns 404 when the restored record isn't in
+    the viewset's `get_queryset()`
+
 ## [4.1.2]
 
 ### Changed
